@@ -1,0 +1,4 @@
+WIDTH = 1280
+HEIGHT = 720
+TITLE = "The Last Onion"
+FPS = 60
