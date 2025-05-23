@@ -138,6 +138,7 @@ class Game:
                                 selected = self.upgrade_options[self.upgrade_selected]
                                 self.apply_preview_upgrade(selected["id"], 1)
                                 self.player.pending_level_ups -= 1
+                                ### Usunac mozliwosc schodzenia ponizej current level
                             elif event.key == pygame.K_a:
                                 selected = self.upgrade_options[self.upgrade_selected]
                                 self.apply_preview_upgrade(selected["id"], -1)
@@ -182,20 +183,19 @@ class Game:
             else:
                 preview_text = f"{upgrade_id}: {int(current_val)}"
             
-            text = font.render(f"{option['desc']} | {preview_text}", True, color)
+            text = font.render(f"{preview_text}", True, color)
             self.screen.surface.blit(text, (200, 200 + i * 60))
 
     def generate_upgrade_options(self):
-        p = self.player
         self.upgrade_options = [
-            {"id": "HP", "desc": f"HP ({p.max_hp} → {p.max_hp + 1})"},
-            {"id": "Melee Damage", "desc": f"Melee Damage ({p.melee_dmg} → {p.melee_dmg + 1})"},
-            {"id": "Ranged Damage", "desc": f"Ranged Damage ({p.ranged_dmg} → {p.ranged_dmg + 1})"},
-            {"id": "Magic Damage", "desc": f"Magic Damage ({p.magic_dmg} → {p.magic_dmg + 1})"},
-            {"id": "Attack Speed", "desc": f"Attack Speed ({p.attack_speed:.1f} → {p.attack_speed + 0.1:.1f})"},
-            {"id": "Range", "desc": f"Range ({p.range} → {p.range + 10})"},
-            {"id": "Armor", "desc": f"Armor ({p.armor} → {p.armor + 1})"},
-            {"id": "Speed", "desc": f"Speed ({p.speed} → {p.speed + 1})"},
+            {"id": "HP"},
+            {"id": "Melee Damage"},
+            {"id": "Ranged Damage"},
+            {"id": "Magic Damage"},
+            {"id": "Attack Speed"},
+            {"id": "Range"},
+            {"id": "Armor"},
+            {"id": "Speed"},
         ]
         self.upgrade_selected = 0
         self.upgrade_preview_stats = {
@@ -210,24 +210,22 @@ class Game:
         }
 
     def apply_upgrade(self, upgrade_id):
-        p = self.player
         if upgrade_id == "HP":
-            p.max_hp += 1
-            p.current_hp = p.max_hp
+            self.player.max_hp += 1
         elif upgrade_id == "Melee Damage":
-            p.melee_dmg += 1
+            self.player.melee_dmg += 1
         elif upgrade_id == "Ranged Damage":
-            p.ranged_dmg += 1
+            self.player.ranged_dmg += 1
         elif upgrade_id == "Magic Damage":
-            p.magic_dmg += 1
+            self.player.magic_dmg += 1
         elif upgrade_id == "Attack Speed":
-            p.attack_speed += 0.1
+            self.player.attack_speed += 0.1
         elif upgrade_id == "Range":
-            p.range += 10
+            self.player.range += 10
         elif upgrade_id == "Armor":
-            p.armor += 1
+            self.player.armor += 1
         elif upgrade_id == "Speed":
-            p.speed += 1
+            self.player.speed += 1
 
     def apply_preview_upgrade(self, upgrade_id, direction):
         if upgrade_id == "HP":
