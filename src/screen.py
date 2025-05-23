@@ -24,6 +24,28 @@ class Screen:
 
     def fill_game_background(self):
         self.surface.blit(self.game_background, (0, 0))
+        
+    def menu(self, selected_option):
+        # settings
+        self.fill_menu_background()
+        title_font = pygame.font.Font(None, 72)
+        options_font = pygame.font.Font(None, 42)
+
+        # display title
+        title = title_font.render(TITLE, True, (255, 255, 255))
+        title_rect = title.get_rect(center=(self._width // 2, self._height // 2 - 150))
+        self.surface.blit(title, title_rect)
+
+        # display options
+        options = ["New Game", "Exit"]
+        option_spacing = 60
+        start_y = self._height // 2 - (len(options) * option_spacing) // 2
+
+        for index, option_text in enumerate(options):
+            color = (255, 255, 0) if index + 1 == selected_option else (255, 255, 255)
+            option_surface = options_font.render(f"{index + 1}. {option_text}", True, color)
+            option_rect = option_surface.get_rect(center=(self._width // 2, start_y + index * option_spacing))
+            self.surface.blit(option_surface, option_rect)
 
     def display_player_current_hp(self, player):
         bar_width = 200
@@ -77,3 +99,38 @@ class Screen:
         font = pygame.font.Font(None, 36)
         round_text = font.render(f"Enemies: {len(enemies)}", True, (255, 255, 255))
         self.surface.blit(round_text, (10, HEIGHT - 40))
+        
+    def display_game_over_screen(self, wave):
+        self.surface.fill("grey")
+        game_over_font = pygame.font.Font(None, 48)
+        game_over = game_over_font.render(f"Run Lost on Wave {wave}", True, (255, 255, 255))
+        game_over_rect = game_over.get_rect(center = (self._width // 2, 50))
+        self.surface.blit(game_over, game_over_rect)
+        self.display_game_over_stats()
+        
+    def display_game_over_stats(self):
+        # overall stats
+        rect_width = self._width - 200
+        rect_height = self._height - 200
+        rect_x = 100
+        rect_y = 100
+        rect = pygame.Rect(rect_x, rect_y, rect_width, rect_height)
+        self.surface.fill("black", rect)
+        
+        # stats rectangle
+        stats_rect_width = rect_width - 800
+        stats_rect = pygame.Rect(rect_x, rect_y, stats_rect_width, rect_height)
+        self.surface.fill("pink", stats_rect)
+        
+        # player stats
+        font = pygame.font.Font(None, 36)
+        stats_font = pygame.font.Font(None, 24)
+        text = font.render("Stats", True, (255, 255, 255))
+        text_rect = text.get_rect(center=(stats_rect.centerx, rect_y + 25))
+        self.surface.blit(text, text_rect)
+        
+        ### DODAC WYSWIETLANIE STATYSTYK !!! ####
+        
+        
+        
+        

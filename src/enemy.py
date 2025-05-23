@@ -43,6 +43,11 @@ class Enemy:
 
         self.x += dx * self.speed
         self.y += dy * self.speed
+        
+    def distance_to(self, player):
+        dx = player.x - self.x
+        dy = player.y - self.y
+        return math.hypot(dx, dy)
 
     def attack(self, player):
         current_time = pygame.time.get_ticks()
@@ -52,8 +57,4 @@ class Enemy:
         if self.distance_to(player) <= self.range and time_since_last_attack >= 1 / self.attack_speed:
             player.current_hp -= self.damage
             self.last_time_attack = current_time
-    
-    def distance_to(self, player):
-        dx = player.x - self.x
-        dy = player.y - self.y
-        return math.hypot(dx, dy)
+        ####### dodac armor gracza!

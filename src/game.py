@@ -1,5 +1,6 @@
 import pygame
 import random
+
 from screen import *
 from player import *
 from enemy import *
@@ -9,9 +10,11 @@ class Game:
     def __init__(self):
         pygame.init()
 
+        # screen
         self.screen = Screen()
         self.running = True
 
+        # game
         self.state = "menu"
         self.selected_option = 1
         self.round = 1
@@ -20,37 +23,20 @@ class Game:
         self.upgrade_selected = 0
         self.upgrade_preview_stats = {}
 
+        # player
         self.player = Player("player")
 
+        # enemies
         self.enemies = []
         self.max_enemies = 3
         self.dead_enemies_loot = []
-
         self.gold = pygame.transform.scale(pygame.image.load("src/sprites/gold_exp.png"), (50, 50))
-
-    def menu(self):
-        self.screen.fill_menu_background()
-        title_font = pygame.font.Font(None, 72)
-        options_font = pygame.font.Font(None, 42)
-
-        title = title_font.render(TITLE, True, (255, 255, 255))
-        title_rect = title.get_rect(center=(self.screen._width // 2, self.screen._height // 2 - 150))
-        self.screen.surface.blit(title, title_rect)
-
-        options = ["New Game", "Exit"]
-        option_spacing = 60
-        start_y = self.screen._height // 2 - (len(options) * option_spacing) // 2
-
-        for index, option_text in enumerate(options):
-            color = (255, 255, 0) if index + 1 == self.selected_option else (255, 255, 255)
-            option_surface = options_font.render(f"{index + 1}. {option_text}", True, color)
-            option_rect = option_surface.get_rect(center=(self.screen._width // 2, start_y + index * option_spacing))
-            self.screen.surface.blit(option_surface, option_rect)
 
     def game(self):
         self.screen.fill_game_background()
         keys = pygame.key.get_pressed()
 
+        # draw loot after killing enemy
         for loot in self.dead_enemies_loot[:]:
             loot_rect = pygame.Rect(loot["x"], loot["y"], 10, 10)
             player_rect = pygame.Rect(self.player.x, self.player.y, self.player.width, self.player.height)
@@ -65,6 +51,7 @@ class Game:
             else:
                 self.screen.surface.blit(self.gold, (loot["x"], loot["y"]))
 
+        # drawe enemies
         for enemy in self.enemies[:]:
             enemy.follow_player(self.player)
             enemy.draw(self.screen)
@@ -80,21 +67,28 @@ class Game:
 
             enemy.attack(self.player)
 
+        # player movement
         self.player.move(keys)
         self.player.draw(self.screen)
         self.player.attack(self.enemies)
 
-        if self.round_in_progress and not self.enemies:
-            self.round_in_progress = False
-            self.round += 1
-            if self.round > 20:
-                self.state = "victory"
-            elif self.player.pending_level_ups > 0:
-                self.generate_upgrade_options()
-                self.state = "upgrade"
-            else:
-                self.start_round()
+        # round state
+        if self.player.current_hp > 0:
+            if self.round_in_progress and not self.enemies:
+                self.round_in_progress = False
+                self.round += 1
+                if self.round > 20:
+                    self.state = "victory"
+                elif self.player.pending_level_ups > 0:
+                    self.generate_upgrade_options()
+                    self.state = "level_up"
+                else:
+                    self.start_round()
+        else:
+            self.state = "game_over"
+            
 
+        # UI
         self.screen.display_current_round(self.round)
         self.screen.display_current_enemies_count(self.enemies)
         self.screen.display_player_current_hp(self.player)
@@ -107,6 +101,7 @@ class Game:
                 if event.type == pygame.QUIT:
                     self.running = False
                 elif event.type == pygame.KEYDOWN:
+                    # main menu
                     if self.state == "menu":
                         if event.key in (pygame.K_w, pygame.K_UP):
                             self.selected_option = 1
@@ -119,55 +114,62 @@ class Game:
                                 self.state = "game"
                             elif self.selected_option == 2:
                                 self.running = False
-                    elif self.state == "upgrade":
+                    # upgrade 
+                    elif self.state == "level_up":
                         if self.upgrade_options:
                             if event.key in (pygame.K_w, pygame.K_UP):
                                 self.upgrade_selected = (self.upgrade_selected - 1) % len(self.upgrade_options)
                             elif event.key in (pygame.K_s, pygame.K_DOWN):
                                 self.upgrade_selected = (self.upgrade_selected + 1) % len(self.upgrade_options)
                             elif event.key in (pygame.K_RETURN, pygame.K_KP_ENTER):
-                                selected = self.upgrade_options[self.upgrade_selected]
-                                self.apply_upgrade(selected["id"])
-                                self.player.pending_level_ups -= 1
-                                if self.player.pending_level_ups > 0:
-                                    self.generate_upgrade_options()
+                                if self.player.pending_level_ups > 1:
+                                    self.player.pending_level_ups -= 1
                                 else:
+                                    self.set_upgrades()
+                                    self.player.pending_level_ups = 0
                                     self.start_round()
                                     self.state = "game"
                             elif event.key == pygame.K_d and self.player.pending_level_ups > 0:
                                 selected = self.upgrade_options[self.upgrade_selected]
                                 self.apply_preview_upgrade(selected["id"], 1)
                                 self.player.pending_level_ups -= 1
-                                ### Usunac mozliwosc schodzenia ponizej current level
                             elif event.key == pygame.K_a:
-                                selected = self.upgrade_options[self.upgrade_selected]
-                                self.apply_preview_upgrade(selected["id"], -1)
-                                self.player.pending_level_ups += 1
+                                if self.player.pending_level_ups < self.max_pending_level_ups:
+                                    selected = self.upgrade_options[self.upgrade_selected]
+                                    self.apply_preview_upgrade(selected["id"], -1)
+                                    self.player.pending_level_ups += 1
 
+            # game states
             if self.state == "menu":
-                self.menu()
+                self.screen.menu(self.selected_option)
             elif self.state == "game":
                 self.game()
-            elif self.state == "upgrade":
-                self.upgrade()
+            elif self.state == "level_up":
+                self.level_up()
+            elif self.state == "game_over":
+                self.screen.display_game_over_screen(self.round)
 
             self.screen.update()
 
         pygame.quit()
 
     def start_round(self):
+        # round start
         self.dead_enemies_loot.clear()
         self.player.current_hp = self.player.max_hp
         self.enemies = []
         self.round_in_progress = True
         enemy_count = self.max_enemies + self.round * 2
 
+        # draw enemies in random position
         for _ in range(enemy_count):
             x = random.randint(0, self.screen._width - 50)
             y = random.randint(0, self.screen._height - 50)
+            ### draw random enemies!!!! ###
             self.enemies.append(Enemy("zombie_cabbage", x, y))
+            ### draw random enemies!!!! ###
 
-    def upgrade(self):
+    def level_up(self):
         self.screen.surface.fill((30, 30, 30))
         font = pygame.font.Font(None, 48)
         title = font.render("Choose an upgrade", True, (255, 255, 255))
@@ -176,7 +178,6 @@ class Game:
         for i, option in enumerate(self.upgrade_options):
             color = (255, 255, 0) if i == self.upgrade_selected else (255, 255, 255)
             upgrade_id = option["id"]
-            
             current_val = self.upgrade_preview_stats[upgrade_id]
             if upgrade_id == "Attack Speed":
                 preview_text = f"{upgrade_id}: {current_val:.1f}"
@@ -185,8 +186,12 @@ class Game:
             
             text = font.render(f"{preview_text}", True, color)
             self.screen.surface.blit(text, (200, 200 + i * 60))
+            
+        pending_levels = font.render(f"Pending upgrades: {self.player.pending_level_ups}", True, (255, 255, 255))
+        self.screen.surface.blit(pending_levels, (800, 200))
 
     def generate_upgrade_options(self):
+        self.max_pending_level_ups = self.player.pending_level_ups
         self.upgrade_options = [
             {"id": "HP"},
             {"id": "Melee Damage"},
@@ -228,6 +233,20 @@ class Game:
             self.player.speed += 1
 
     def apply_preview_upgrade(self, upgrade_id, direction):
+        base_stats = {
+            "HP": self.player.max_hp,
+            "Melee Damage": self.player.melee_dmg,
+            "Ranged Damage": self.player.ranged_dmg,
+            "Magic Damage": self.player.magic_dmg,
+            "Attack Speed": self.player.attack_speed,
+            "Range": self.player.range,
+            "Armor": self.player.armor,
+            "Speed": self.player.speed
+        }
+        if direction == -1:
+            if self.upgrade_preview_stats[upgrade_id] <= base_stats[upgrade_id]:
+                return
+        
         if upgrade_id == "HP":
             self.upgrade_preview_stats["HP"] += direction
         elif upgrade_id == "Melee Damage":
@@ -245,3 +264,12 @@ class Game:
         elif upgrade_id == "Speed":
             self.upgrade_preview_stats["Speed"] += direction
 
+    def set_upgrades(self):
+        self.player.max_hp = self.upgrade_preview_stats["HP"]
+        self.player.melee_dmg = self.upgrade_preview_stats["Melee Damage"]
+        self.player.ranged_dmg = self.upgrade_preview_stats["Ranged Damage"]
+        self.player.magic_dmg = self.upgrade_preview_stats["Magic Damage"]
+        self.player.attack_speed = self.upgrade_preview_stats["Attack Speed"]
+        self.player.range = self.upgrade_preview_stats["Range"]
+        self.player.armor = self.upgrade_preview_stats["Armor"]
+        self.player.speed = self.upgrade_preview_stats["Speed"]
