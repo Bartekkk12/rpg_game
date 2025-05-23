@@ -12,7 +12,7 @@ class Screen:
         self.game_background = pygame.transform.scale(pygame.image.load("src/sprites/backgrounds/game_background.png"), (self._width, self._height))
         self.icon = pygame.image.load("src/sprites/player.png")
 
-        pygame.display.set_caption(TITLE, icontitle="src/sprites/player.png")
+        pygame.display.set_caption(TITLE)
         pygame.display.set_icon(self.icon)
 
     def update(self):
