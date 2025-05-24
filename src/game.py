@@ -87,13 +87,8 @@ class Game:
         else:
             self.state = "game_over"
             
-
         # UI
-        self.screen.display_current_round(self.round)
-        self.screen.display_current_enemies_count(self.enemies)
-        self.screen.display_player_current_hp(self.player)
-        self.screen.display_player_current_level(self.player)
-        self.screen.display_player_gold(self.player)
+        self.screen.display_UI(self.player, self.enemies, self.round)
 
     def run(self):
         while self.running:
@@ -107,7 +102,7 @@ class Game:
                             self.selected_option = 1
                         elif event.key in (pygame.K_s, pygame.K_DOWN):
                             self.selected_option = 2
-                        elif event.key in (pygame.K_RETURN, pygame.K_KP_ENTER):
+                        elif event.key in (pygame.K_RETURN, pygame.K_KP_ENTER, pygame.K_SPACE):
                             if self.selected_option == 1:
                                 self.round = 1
                                 self.start_round()
@@ -138,7 +133,19 @@ class Game:
                                     selected = self.upgrade_options[self.upgrade_selected]
                                     self.apply_preview_upgrade(selected["id"], -1)
                                     self.player.pending_level_ups += 1
-
+                    # game over                
+                    elif self.state == "game_over":
+                        if event.key == pygame.K_d:
+                            self.selected_option = 2
+                        elif event.key == pygame.K_a:
+                            self.selected_option = 1
+                        elif event.key in (pygame.K_RETURN, pygame.K_KP_ENTER, pygame.K_SPACE):
+                            if self.selected_option == 1:
+                                self.round = 1
+                                self.start_round()
+                                self.state = "game"
+                            elif self.selected_option == 2:
+                                self.state = "menu"
             # game states
             if self.state == "menu":
                 self.screen.menu(self.selected_option)
@@ -147,7 +154,7 @@ class Game:
             elif self.state == "level_up":
                 self.level_up()
             elif self.state == "game_over":
-                self.screen.display_game_over_screen(self.round)
+                self.screen.display_game_over_screen(self.round, self.selected_option)
 
             self.screen.update()
 

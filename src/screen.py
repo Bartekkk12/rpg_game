@@ -25,6 +25,13 @@ class Screen:
     def fill_game_background(self):
         self.surface.blit(self.game_background, (0, 0))
         
+    def display_UI(self, player, enemies, current_round):
+        self.display_current_round(current_round)
+        self.display_current_enemies_count(enemies)
+        self.display_player_current_hp(player)
+        self.display_player_current_level(player)
+        self.display_player_gold(player)
+        
     def menu(self, selected_option):
         # settings
         self.fill_menu_background()
@@ -100,13 +107,30 @@ class Screen:
         round_text = font.render(f"Enemies: {len(enemies)}", True, (255, 255, 255))
         self.surface.blit(round_text, (10, HEIGHT - 40))
         
-    def display_game_over_screen(self, wave):
+    def display_game_over_screen(self, wave, selected_option):
         self.surface.fill("grey")
         game_over_font = pygame.font.Font(None, 48)
         game_over = game_over_font.render(f"Run Lost on Wave {wave}", True, (255, 255, 255))
         game_over_rect = game_over.get_rect(center = (self._width // 2, 50))
         self.surface.blit(game_over, game_over_rect)
         self.display_game_over_stats()
+        
+        # display options
+        options = ["Restart", "Exit"]
+        options_font = pygame.font.Font(None, 42)
+        option_spacing = 120
+
+        options_y = 150 + (self._height - 200)
+
+        option_surfaces = [options_font.render(f"{txt}", True, (255,255,0) if i+1==selected_option else (255,255,255)) for i, txt in enumerate(options)]
+        total_width = sum(surf.get_width() for surf in option_surfaces) + option_spacing * (len(options) - 1)
+        start_x = (self._width - total_width) // 2
+
+        current_x = start_x
+        for surf in option_surfaces:
+            rect = surf.get_rect(midtop=(current_x + surf.get_width()//2, options_y))
+            self.surface.blit(surf, rect)
+            current_x += surf.get_width() + option_spacing
         
     def display_game_over_stats(self):
         # overall stats
