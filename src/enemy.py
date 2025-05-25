@@ -19,11 +19,13 @@ class Enemy:
         self.range = self.enemy_type["range"]
         self.last_time_attack = pygame.time.get_ticks()
 
+        # size and position
         self.x = x
         self.y = y
         self.width = 80
         self.height = 80
 
+        # sprites
         self.sprite = pygame.image.load(self.enemy_type["sprite"])
         self.sprite = pygame.transform.scale(self.sprite, (self.width, self.height))
 

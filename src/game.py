@@ -185,12 +185,11 @@ class Game:
 
         for i, option in enumerate(self.upgrade_options):
             color = (255, 255, 0) if i == self.upgrade_selected else (255, 255, 255)
+            
             upgrade_id = option["id"]
             current_val = self.upgrade_preview_stats[upgrade_id]
-            if upgrade_id == "Attack Speed":
-                preview_text = f"{upgrade_id}: {current_val:.1f}"
-            else:
-                preview_text = f"{upgrade_id}: {int(current_val)}"
+            
+            preview_text = f"{upgrade_id}: {current_val:.1f}" if upgrade_id == "Attack Speed" else f"{upgrade_id}: {int(current_val)}"
             
             text = font.render(f"{preview_text}", True, color)
             self.screen.surface.blit(text, (200, 200 + i * 60))
