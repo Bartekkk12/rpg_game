@@ -141,6 +141,7 @@ class Game:
                             self.selected_option = 1
                         elif event.key in (pygame.K_RETURN, pygame.K_KP_ENTER, pygame.K_SPACE):
                             if self.selected_option == 1:
+                                self.player.reset_stats()
                                 self.round = 1
                                 self.start_round()
                                 self.state = "game"
@@ -155,7 +156,7 @@ class Game:
                 self.level_up()
             elif self.state == "game_over":
                 self.screen.display_game_over_screen(self.round, self.selected_option)
-
+                
             self.screen.update()
 
         pygame.quit()

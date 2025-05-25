@@ -57,4 +57,5 @@ class Enemy:
         if self.distance_to(player) <= self.range and time_since_last_attack >= 1 / self.attack_speed:
             player.current_hp -= self.damage
             self.last_time_attack = current_time
+            print(f"Enemy attacked Player for {self.damage}")
         ####### dodac armor gracza!

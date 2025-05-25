@@ -78,6 +78,7 @@ class Player:
             closest_enemy = min(enemies_in_range, key=lambda enemy: self.distance_to(enemy))
             closest_enemy.current_hp -= self.damage
             self.last_time_attack = current_time
+            print(f"Player attacked Enemy for {self.damage}")
 
     def distance_to(self, enemy):
         dx = self.x - enemy.x
@@ -92,4 +93,21 @@ class Player:
         self.pending_level_ups += 3
         self.exp -= self.exp_needed
         self.exp_needed += 20
-
+        
+    def reset_stats(self):
+        self.max_hp = 3
+        self.current_hp = self.max_hp
+        self.hp_regen = 0
+        self.melee_dmg = 0
+        self.ranged_dmg = 0
+        self.magic_dmg = 0
+        self.damage = 2
+        self.attack_speed = 1
+        self.range = 500
+        self.armor = 1
+        self.speed = 3
+        self.level = 1
+        self.pending_level_ups = 0
+        self.exp = 0
+        self.exp_needed = 30
+        self.gold = 0
