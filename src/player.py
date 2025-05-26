@@ -1,11 +1,13 @@
 import pygame
 import math
+import entity
+
 from settings import WIDTH, HEIGHT
 
-class Player:
-    def __init__(self, name):
+class Player(entity.Entity):
+    def __init__(self):
+        super().__init__(x = WIDTH // 2, y = HEIGHT // 2, width=100, height=100, image_path="src/sprites/player.png")
         # stats
-        self._name = name
         self.max_hp = 20
         self.current_hp = self.max_hp
         self.hp_regen = 0 # dodac
@@ -28,20 +30,10 @@ class Player:
         self.last_hit_time = 0
         self.hit_cooldown = 1000
 
-        # sprite and position
-        self.width = 100
-        self.height = 100
-        self.x = WIDTH // 2
-        self.y = HEIGHT // 2
-        self.sprite = pygame.image.load("src/sprites/player.png")
-        self.sprite = pygame.transform.scale(self.sprite, (self.width, self.height))
-
-    def draw(self, screen):
-        screen.surface.blit(self.sprite, (self.x, self.y))
-        
+    # overrided function
     def get_rect(self):
         return pygame.Rect(self.x + 10, self.y + 10, self.width - 20, self.height - 20)
-
+    
     def move(self, keys):
         move_x = 0
         move_y = 0
@@ -100,6 +92,16 @@ class Player:
         self.pending_level_ups += 3
         self.exp -= self.exp_needed
         self.exp_needed += 20
+        
+    def apply_upgrades(self, upgrade_preview_stats):
+        self.max_hp = upgrade_preview_stats["HP"]
+        self.melee_dmg = upgrade_preview_stats["Melee Damage"]
+        self.ranged_dmg = upgrade_preview_stats["Ranged Damage"]
+        self.magic_dmg = upgrade_preview_stats["Magic Damage"]
+        self.attack_speed = upgrade_preview_stats["Attack Speed"]
+        self.range = upgrade_preview_stats["Range"]
+        self.armor = upgrade_preview_stats["Armor"]
+        self.speed = upgrade_preview_stats["Speed"]
         
     def reset_stats(self):
         self.max_hp = 3

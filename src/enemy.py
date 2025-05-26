@@ -1,5 +1,6 @@
 import pygame
 import math
+import entity
 
 ENEMIES = {
     "zombie_cabbage": {"max_hp": 3, "speed": 2, "damage": 2, "attack_speed": 1, "range": 50, "exp": 8, "gold": 5, "sprite": "src/sprites/enemies/zombie_cabbage.png"},
@@ -7,8 +8,9 @@ ENEMIES = {
     
 }
 
-class Enemy:
+class Enemy(entity.Entity):
     def __init__(self, enemy_type, x, y):
+        super().__init__(x, y, 80, 80, ENEMIES[enemy_type]["sprite"])
         # stats
         self.enemy_type = ENEMIES[enemy_type]
         self.max_hp = self.enemy_type["max_hp"]
@@ -19,19 +21,8 @@ class Enemy:
         self.range = self.enemy_type["range"]
         self.last_time_attack = pygame.time.get_ticks()
 
-        # size and position
-        self.x = x
-        self.y = y
-        self.width = 80
-        self.height = 80
         self.rect = pygame.Rect(self.x, self.y, self.width, self.height)
 
-        # sprites
-        self.sprite = pygame.image.load(self.enemy_type["sprite"])
-        self.sprite = pygame.transform.scale(self.sprite, (self.width, self.height))
-
-    def draw(self, screen):
-        screen.surface.blit(self.sprite, (self.x, self.y))
         
     def follow_player(self, player):
         dx = player.x - self.x

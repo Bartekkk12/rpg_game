@@ -4,6 +4,7 @@ import random
 from screen import *
 from player import *
 from enemy import *
+from gold import *
 from settings import TITLE
 
 class Game:
@@ -29,18 +30,13 @@ class Game:
         self.menu_ost = "src/sprites/music/menu_ost.wav"
         self.game_ost = "src/sprites/music/game_ost.wav"
         
-        # sounds
-        self.gold_pickup_sound = pygame.mixer.Sound("src/sprites/sounds/pop_sound.wav")
-        self.gold_pickup_sound.set_volume(0.2)
-
         # player
-        self.player = Player("player")
+        self.player = Player()
 
         # enemies
         self.enemies = []
         self.max_enemies = 3
         self.dead_enemies_loot = []
-        self.gold = pygame.transform.scale(pygame.image.load("src/sprites/gold_exp.png"), (50, 50))
 
     def game(self):
         self.screen.fill_game_background()
@@ -48,38 +44,33 @@ class Game:
 
         # draw loot after killing enemy
         for loot in self.dead_enemies_loot[:]:
-            loot_rect = pygame.Rect(loot["x"], loot["y"], 10, 10)
-
             # check for collision with player
-            if loot_rect.colliderect(self.player.get_rect()):
-                self.player.gold += loot["gold"]
-                self.player.exp += loot["exp"]
+            if loot.get_rect().colliderect(self.player.get_rect()):
+                self.player.gold += loot.amount
+                self.player.exp += loot.exp
                 self.dead_enemies_loot.remove(loot)
-                self.gold_pickup_sound.play()
+                loot.play_sound()
 
                 # check if player can lvlup
                 if self.player.check_level_up():
                     self.player.level_up()
             else:
-                self.screen.surface.blit(self.gold, (loot["x"], loot["y"]))
-                pygame.draw.rect(self.screen.surface, (0, 255, 0), (loot["x"], loot["y"], 50, 50), 2) # debugging
+                loot.draw(self.screen)
+                loot.draw_hit_box(self.screen, (0, 0, 255)) # debugging
 
         # drawe enemies
         for enemy in self.enemies[:]:
             enemy.follow_player(self.player)
             enemy.draw(self.screen)
-            pygame.draw.rect(self.screen.surface, (255, 0, 0), enemy.rect, 2)  # debugging
+            enemy.draw_hit_box(self.screen, (255, 0, 0))  # debugging
 
 
             # if enemy died remove him
             if enemy.current_hp <= 0:
                 self.enemies.remove(enemy)
-                self.dead_enemies_loot.append({
-                    "x": enemy.x,
-                    "y": enemy.y,
-                    "gold": enemy.enemy_type["gold"],
-                    "exp": enemy.enemy_type["exp"]
-                })
+                self.dead_enemies_loot.append(
+                    Gold(enemy.x, enemy.y, enemy.enemy_type["gold"], enemy.enemy_type["exp"])
+                )
 
             enemy.attack(self.player)
 
@@ -87,7 +78,7 @@ class Game:
         self.player.move(keys)
         self.player.draw(self.screen)
         self.player.attack(self.enemies)
-        pygame.draw.rect(self.screen.surface, (0, 255, 0), self.player.get_rect(), 2)  # debugging
+        self.player.draw_hit_box(self.screen, (0, 255, 0))  # debugging
 
 
         # round state
@@ -139,7 +130,7 @@ class Game:
                                 if self.player.pending_level_ups > 1:
                                     self.player.pending_level_ups -= 1
                                 else:
-                                    self.set_upgrades()
+                                    self.player.apply_upgrades(self.upgrade_preview_stats)
                                     self.player.pending_level_ups = 0
                                     self.start_round()
                                     self.state = "game"
@@ -204,8 +195,17 @@ class Game:
 
         # draw enemies in random position
         for _ in range(enemy_count):
-            x = random.randint(0, self.screen._width - 50)
-            y = random.randint(0, self.screen._height - 50)
+            while True:
+                x = random.randint(0, self.screen._width - 50)
+                y = random.randint(0, self.screen._height - 50)
+                
+                # draw enemy at lest 150 pixels away from player
+                dx = x - self.player.x
+                dy = y - self.player.y
+                distance = math.hypot(dx, dy)
+                if distance >= 150:
+                    break
+                
             ### draw random enemies!!!! ###
             self.enemies.append(Enemy("zombie_cabbage", x, y))
             ### draw random enemies!!!! ###
@@ -254,24 +254,6 @@ class Game:
             "Speed": self.player.speed
         }
 
-    def apply_upgrade(self, upgrade_id):
-        if upgrade_id == "HP":
-            self.player.max_hp += 1
-        elif upgrade_id == "Melee Damage":
-            self.player.melee_dmg += 1
-        elif upgrade_id == "Ranged Damage":
-            self.player.ranged_dmg += 1
-        elif upgrade_id == "Magic Damage":
-            self.player.magic_dmg += 1
-        elif upgrade_id == "Attack Speed":
-            self.player.attack_speed += 0.1
-        elif upgrade_id == "Range":
-            self.player.range += 10
-        elif upgrade_id == "Armor":
-            self.player.armor += 1
-        elif upgrade_id == "Speed":
-            self.player.speed += 0.4
-
     def apply_preview_upgrade(self, upgrade_id, direction):
         base_stats = {
             "HP": self.player.max_hp,
@@ -303,13 +285,3 @@ class Game:
             self.upgrade_preview_stats["Armor"] += direction
         elif upgrade_id == "Speed":
             self.upgrade_preview_stats["Speed"] += 0.4 * direction
-
-    def set_upgrades(self):
-        self.player.max_hp = self.upgrade_preview_stats["HP"]
-        self.player.melee_dmg = self.upgrade_preview_stats["Melee Damage"]
-        self.player.ranged_dmg = self.upgrade_preview_stats["Ranged Damage"]
-        self.player.magic_dmg = self.upgrade_preview_stats["Magic Damage"]
-        self.player.attack_speed = self.upgrade_preview_stats["Attack Speed"]
-        self.player.range = self.upgrade_preview_stats["Range"]
-        self.player.armor = self.upgrade_preview_stats["Armor"]
-        self.player.speed = self.upgrade_preview_stats["Speed"]
