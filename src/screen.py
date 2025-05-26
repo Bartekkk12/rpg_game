@@ -50,7 +50,7 @@ class Screen:
 
         for index, option_text in enumerate(options):
             color = (255, 255, 0) if index + 1 == selected_option else (255, 255, 255)
-            option_surface = options_font.render(f"{index + 1}. {option_text}", True, color)
+            option_surface = options_font.render(f"{option_text}", True, color)
             option_rect = option_surface.get_rect(center=(self._width // 2, start_y + index * option_spacing))
             self.surface.blit(option_surface, option_rect)
 

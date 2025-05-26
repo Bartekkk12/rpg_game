@@ -6,7 +6,7 @@ class Player:
     def __init__(self, name):
         # stats
         self._name = name
-        self.max_hp = 1
+        self.max_hp = 20
         self.current_hp = self.max_hp
         self.hp_regen = 0 # dodac
         self.melee_dmg = 0 # dodac
@@ -16,13 +16,17 @@ class Player:
         self.attack_speed = 1
         self.range = 500
         self.armor = 1 # dodac
-        self.speed = 10
+        self.speed = 3
         self.level = 1
         self.pending_level_ups = 0
         self.exp = 0
         self.exp_needed = 30
         self.gold = 0
+        
+        # time
         self.last_time_attack = pygame.time.get_ticks()
+        self.last_hit_time = 0
+        self.hit_cooldown = 1000
 
         # sprite and position
         self.width = 100
@@ -34,6 +38,9 @@ class Player:
 
     def draw(self, screen):
         screen.surface.blit(self.sprite, (self.x, self.y))
+        
+    def get_rect(self):
+        return pygame.Rect(self.x + 10, self.y + 10, self.width - 20, self.height - 20)
 
     def move(self, keys):
         move_x = 0

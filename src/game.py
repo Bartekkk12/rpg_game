@@ -9,6 +9,7 @@ from settings import TITLE
 class Game:
     def __init__(self):
         pygame.init()
+        pygame.mixer.init()
 
         # screen
         self.screen = Screen()
@@ -22,6 +23,15 @@ class Game:
         self.upgrade_options = []
         self.upgrade_selected = 0
         self.upgrade_preview_stats = {}
+
+        # music
+        self.current_ost = None
+        self.menu_ost = "src/sprites/music/menu_ost.wav"
+        self.game_ost = "src/sprites/music/game_ost.wav"
+        
+        # sounds
+        self.gold_pickup_sound = pygame.mixer.Sound("src/sprites/sounds/pop_sound.wav")
+        self.gold_pickup_sound.set_volume(0.2)
 
         # player
         self.player = Player("player")
@@ -39,23 +49,29 @@ class Game:
         # draw loot after killing enemy
         for loot in self.dead_enemies_loot[:]:
             loot_rect = pygame.Rect(loot["x"], loot["y"], 10, 10)
-            player_rect = pygame.Rect(self.player.x, self.player.y, self.player.width, self.player.height)
 
-            if loot_rect.colliderect(player_rect):
+            # check for collision with player
+            if loot_rect.colliderect(self.player.get_rect()):
                 self.player.gold += loot["gold"]
                 self.player.exp += loot["exp"]
                 self.dead_enemies_loot.remove(loot)
+                self.gold_pickup_sound.play()
 
+                # check if player can lvlup
                 if self.player.check_level_up():
                     self.player.level_up()
             else:
                 self.screen.surface.blit(self.gold, (loot["x"], loot["y"]))
+                pygame.draw.rect(self.screen.surface, (0, 255, 0), (loot["x"], loot["y"], 50, 50), 2) # debugging
 
         # drawe enemies
         for enemy in self.enemies[:]:
             enemy.follow_player(self.player)
             enemy.draw(self.screen)
+            pygame.draw.rect(self.screen.surface, (255, 0, 0), enemy.rect, 2)  # debugging
 
+
+            # if enemy died remove him
             if enemy.current_hp <= 0:
                 self.enemies.remove(enemy)
                 self.dead_enemies_loot.append({
@@ -71,6 +87,8 @@ class Game:
         self.player.move(keys)
         self.player.draw(self.screen)
         self.player.attack(self.enemies)
+        pygame.draw.rect(self.screen.surface, (0, 255, 0), self.player.get_rect(), 2)  # debugging
+
 
         # round state
         if self.player.current_hp > 0:
@@ -104,6 +122,7 @@ class Game:
                             self.selected_option = 2
                         elif event.key in (pygame.K_RETURN, pygame.K_KP_ENTER, pygame.K_SPACE):
                             if self.selected_option == 1:
+                                pygame.mixer.music.stop()
                                 self.round = 1
                                 self.start_round()
                                 self.state = "game"
@@ -149,12 +168,26 @@ class Game:
                                 self.state = "menu"
             # game states
             if self.state == "menu":
+                # play menu ost
+                if not pygame.mixer.music.get_busy() or self.current_ost != "menu":
+                    pygame.mixer.music.load(self.menu_ost)
+                    pygame.mixer.music.play(-1)
+                    pygame.mixer.music.set_volume(0.2)
+                    self.current_ost = "menu"
                 self.screen.menu(self.selected_option)
             elif self.state == "game":
+                # play game ost
+                if not pygame.mixer.music.get_busy() or self.current_ost != "game":
+                    pygame.mixer.music.load(self.game_ost)
+                    pygame.mixer.music.play(-1)
+                    pygame.mixer.music.set_volume(0.05)
+                    self.current_ost = "game"
                 self.game()
             elif self.state == "level_up":
+                pygame.mixer.music.stop()
                 self.level_up()
             elif self.state == "game_over":
+                pygame.mixer.music.stop()
                 self.screen.display_game_over_screen(self.round, self.selected_option)
                 
             self.screen.update()
@@ -189,7 +222,7 @@ class Game:
             upgrade_id = option["id"]
             current_val = self.upgrade_preview_stats[upgrade_id]
             
-            preview_text = f"{upgrade_id}: {current_val:.1f}" if upgrade_id == "Attack Speed" else f"{upgrade_id}: {int(current_val)}"
+            preview_text = f"{upgrade_id}: {current_val:.1f}" if upgrade_id == "Attack Speed" or upgrade_id == "Speed" else f"{upgrade_id}: {int(current_val)}"
             
             text = font.render(f"{preview_text}", True, color)
             self.screen.surface.blit(text, (200, 200 + i * 60))
@@ -237,7 +270,7 @@ class Game:
         elif upgrade_id == "Armor":
             self.player.armor += 1
         elif upgrade_id == "Speed":
-            self.player.speed += 1
+            self.player.speed += 0.4
 
     def apply_preview_upgrade(self, upgrade_id, direction):
         base_stats = {
@@ -265,11 +298,11 @@ class Game:
         elif upgrade_id == "Attack Speed":
             self.upgrade_preview_stats["Attack Speed"] += 0.1 * direction
         elif upgrade_id == "Range":
-            self.upgrade_preview_stats["Range"] += 10 * direction
+            self.upgrade_preview_stats["Range"] += direction
         elif upgrade_id == "Armor":
             self.upgrade_preview_stats["Armor"] += direction
         elif upgrade_id == "Speed":
-            self.upgrade_preview_stats["Speed"] += direction
+            self.upgrade_preview_stats["Speed"] += 0.4 * direction
 
     def set_upgrades(self):
         self.player.max_hp = self.upgrade_preview_stats["HP"]
