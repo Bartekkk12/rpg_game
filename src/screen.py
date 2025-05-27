@@ -156,5 +156,25 @@ class Screen:
         ### DODAC WYSWIETLANIE STATYSTYK !!! ####
         
         
+    def display_level_up_screen(self, upgrade_options, upgrade_selected, upgrade_preview_stats, player):
+        self.surface.fill((30, 30, 30))
+        font = pygame.font.Font(None, 48)
+        title = font.render("Choose an upgrade", True, (255, 255, 255))
+        self.surface.blit(title, (self._width // 2 - title.get_width() // 2, 100))
+
+        for i, option in enumerate(upgrade_options):
+            color = (255, 255, 0) if i == upgrade_selected else (255, 255, 255)
+            upgrade_id = option["id"]
+            current_val = upgrade_preview_stats[upgrade_id]
+
+            if upgrade_id in ("Attack Speed", "Speed"):
+                preview_text = f"{upgrade_id}: {current_val:.1f}"
+            else:
+                preview_text = f"{upgrade_id}: {int(current_val)}"
+
+            text = font.render(preview_text, True, color)
+            self.surface.blit(text, (200, 200 + i * 60))
         
+        pending_levels = font.render(f"Pending upgrades: {player.pending_level_ups}", True, (255, 255, 255))
+        self.surface.blit(pending_levels, (800, 200))
         

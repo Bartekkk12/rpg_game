@@ -64,7 +64,6 @@ class Game:
             enemy.draw(self.screen)
             enemy.draw_hit_box(self.screen, (255, 0, 0))  # debugging
 
-
             # if enemy died remove him
             if enemy.current_hp <= 0:
                 self.enemies.remove(enemy)
@@ -79,7 +78,6 @@ class Game:
         self.player.draw(self.screen)
         self.player.attack(self.enemies)
         self.player.draw_hit_box(self.screen, (0, 255, 0))  # debugging
-
 
         # round state
         if self.player.current_hp > 0:
@@ -114,6 +112,7 @@ class Game:
                         elif event.key in (pygame.K_RETURN, pygame.K_KP_ENTER, pygame.K_SPACE):
                             if self.selected_option == 1:
                                 pygame.mixer.music.stop()
+                                self.player.reset_stats()
                                 self.round = 1
                                 self.start_round()
                                 self.state = "game"
@@ -176,7 +175,7 @@ class Game:
                 self.game()
             elif self.state == "level_up":
                 pygame.mixer.music.stop()
-                self.level_up()
+                self.screen.display_level_up_screen(self.upgrade_options, self.upgrade_selected, self.upgrade_preview_stats, self.player)
             elif self.state == "game_over":
                 pygame.mixer.music.stop()
                 self.screen.display_game_over_screen(self.round, self.selected_option)
@@ -209,26 +208,6 @@ class Game:
             ### draw random enemies!!!! ###
             self.enemies.append(Enemy("zombie_cabbage", x, y))
             ### draw random enemies!!!! ###
-
-    def level_up(self):
-        self.screen.surface.fill((30, 30, 30))
-        font = pygame.font.Font(None, 48)
-        title = font.render("Choose an upgrade", True, (255, 255, 255))
-        self.screen.surface.blit(title, (self.screen._width // 2 - title.get_width() // 2, 100))
-
-        for i, option in enumerate(self.upgrade_options):
-            color = (255, 255, 0) if i == self.upgrade_selected else (255, 255, 255)
-            
-            upgrade_id = option["id"]
-            current_val = self.upgrade_preview_stats[upgrade_id]
-            
-            preview_text = f"{upgrade_id}: {current_val:.1f}" if upgrade_id == "Attack Speed" or upgrade_id == "Speed" else f"{upgrade_id}: {int(current_val)}"
-            
-            text = font.render(f"{preview_text}", True, color)
-            self.screen.surface.blit(text, (200, 200 + i * 60))
-            
-        pending_levels = font.render(f"Pending upgrades: {self.player.pending_level_ups}", True, (255, 255, 255))
-        self.screen.surface.blit(pending_levels, (800, 200))
 
     def generate_upgrade_options(self):
         self.max_pending_level_ups = self.player.pending_level_ups
