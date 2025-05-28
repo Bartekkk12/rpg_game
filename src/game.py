@@ -178,7 +178,7 @@ class Game:
                 self.screen.display_level_up_screen(self.upgrade_options, self.upgrade_selected, self.upgrade_preview_stats, self.player)
             elif self.state == "game_over":
                 pygame.mixer.music.stop()
-                self.screen.display_game_over_screen(self.round, self.selected_option)
+                self.screen.display_game_over_screen(self.round, self.selected_option, self.player)
                 
             self.screen.update()
 
