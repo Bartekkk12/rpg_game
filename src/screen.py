@@ -1,4 +1,5 @@
 import pygame
+
 from settings import *
 
 class Screen:
@@ -109,11 +110,7 @@ class Screen:
         self.surface.blit(round_text, (10, HEIGHT - 40))
         
     def display_game_over_screen(self, wave, selected_option, player):
-<<<<<<< HEAD
-        self.surface.fill("grey")
-=======
         self.surface.blit(self.game_over_background, (0, 0))
->>>>>>> 9630c0a585325576fe4c989368273b6f995521d7
         game_over_font = pygame.font.Font(None, 48)
         game_over = game_over_font.render(f"Run Lost on Wave {wave}", True, (255, 255, 255))
         game_over_rect = game_over.get_rect(center = (self._width // 2, 50))
@@ -160,8 +157,6 @@ class Screen:
         
         stats = {
             "HP": player.max_hp,
-            "Level": player.level,
-            "HP Regen": player.hp_regen,
             "Melee Damage": player.melee_dmg,
             "Ranged Damage": player.ranged_dmg,
             "Magic Damage": player.magic_dmg,
@@ -170,16 +165,6 @@ class Screen:
             "Armor": player.armor,
             "Speed": round(player.speed, 2)
         }
-<<<<<<< HEAD
-=======
-        
-        start_y = text_rect.bottom + 20
-        line_height = 32
-        for i, (stat_id, stat) in enumerate(stats.items()):
-            stat_text = f"{stat_id}: {stat}"
-            rendered = stats_font.render(stat_text, True, (0, 0, 0))
-            self.surface.blit(rendered, (stats_rect.left + 20, start_y + i * line_height))
->>>>>>> 9630c0a585325576fe4c989368273b6f995521d7
         
         start_y = text_rect.bottom + 20
         line_height = 32
