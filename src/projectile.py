@@ -1,3 +1,5 @@
+import pygame
+
 from math import hypot
 
 class Projectile:
@@ -20,6 +22,6 @@ class Projectile:
         
         self.x += dx * self.speed
         self.y += dy * self.speed
-        
-        
-        
+
+    def draw(self, screen):
+        pygame.draw.rect(screen.surface, (255, 0, 0), (50, 50))
