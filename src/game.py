@@ -51,7 +51,7 @@ class Game:
                 self.dead_enemies_loot.remove(loot)
                 loot.play_sound()
 
-                # check if player can lvlup
+                # check if player can level up
                 if self.player.check_level_up():
                     self.player.level_up()
             else:
@@ -170,7 +170,7 @@ class Game:
                 if not pygame.mixer.music.get_busy() or self.current_ost != "game":
                     pygame.mixer.music.load(self.game_ost)
                     pygame.mixer.music.play(-1)
-                    pygame.mixer.music.set_volume(0.05)
+                    pygame.mixer.music.set_volume(0.02)
                     self.current_ost = "game"
                 self.game()
             elif self.state == "level_up":
@@ -178,7 +178,7 @@ class Game:
                 self.screen.display_level_up_screen(self.upgrade_options, self.upgrade_selected, self.upgrade_preview_stats, self.player)
             elif self.state == "game_over":
                 pygame.mixer.music.stop()
-                self.screen.display_game_over_screen(self.round, self.selected_option)
+                self.screen.display_game_over_screen(self.round, self.selected_option, self.player)
                 
             self.screen.update()
 
