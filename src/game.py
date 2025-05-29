@@ -73,10 +73,11 @@ class Game:
 
             enemy.attack(self.player)
 
-        # player movement
+        # player 
         self.player.move(keys)
         self.player.draw(self.screen)
         self.player.attack(self.enemies)
+        self.player.regen_hp()
         self.player.draw_hit_box(self.screen, (0, 255, 0))  # debugging
 
         # round state
@@ -156,6 +157,21 @@ class Game:
                                 self.state = "game"
                             elif self.selected_option == 2:
                                 self.state = "menu"
+                    # victory            
+                    elif self.state == "victory":
+                        if event.key == pygame.K_d:
+                            self.selected_option = 2
+                        elif event.key == pygame.K_a:
+                            self.selected_option = 1
+                        elif event.key in (pygame.K_RETURN, pygame.K_KP_ENTER, pygame.K_SPACE):
+                            if self.selected_option == 1:
+                                self.player.reset_stats()
+                                self.round = 1
+                                self.start_round()
+                                self.state = "game"
+                            elif self.selected_option == 2:
+                                self.state = "menu"
+                        
             # game states
             if self.state == "menu":
                 # play menu ost
@@ -177,6 +193,9 @@ class Game:
                 pygame.mixer.music.stop()
                 self.screen.display_level_up_screen(self.upgrade_options, self.upgrade_selected, self.upgrade_preview_stats, self.player)
             elif self.state == "game_over":
+                pygame.mixer.music.stop()
+                self.screen.display_game_over_screen(self.round, self.selected_option, self.player)
+            elif self.state == "victory":
                 pygame.mixer.music.stop()
                 self.screen.display_game_over_screen(self.round, self.selected_option, self.player)
                 

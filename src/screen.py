@@ -112,7 +112,7 @@ class Screen:
     def display_game_over_screen(self, wave, selected_option, player):
         self.surface.blit(self.game_over_background, (0, 0))
         game_over_font = pygame.font.Font(None, 48)
-        game_over = game_over_font.render(f"Run Lost on Wave {wave}", True, (255, 255, 255))
+        game_over = game_over_font.render(f"Run Lost on Wave {wave}", True, (255, 255, 255)) if wave < 20 else game_over_font.render(f"Run Won", True, (255, 255, 255))
         game_over_rect = game_over.get_rect(center = (self._width // 2, 50))
         self.surface.blit(game_over, game_over_rect)
         self.display_game_over_stats(player)

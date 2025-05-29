@@ -53,14 +53,12 @@ class Enemy(entity.Entity):
         now = pygame.time.get_ticks()
         if self.rect.colliderect(player.get_rect()):
             if now - player.last_hit_time >= player.hit_cooldown:
-                player.current_hp -= self.damage
+                player.take_damage(self.damage)
                 player.last_hit_time = now
                 print(f"Player collide with enemy for {self.damage} dmg")
 
         # attack player if in range
-        ####### dodac armor gracza!
         if self.distance_to(player) <= self.range and time_since_last_attack >= 1 / self.attack_speed:
-            player.current_hp -= self.damage
+            player.take_damage(self.damage)
             self.last_time_attack = current_time
             print(f"Enemy attacked Player for {self.damage} dmg")
-        ####### dodac armor gracza!

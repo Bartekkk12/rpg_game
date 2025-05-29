@@ -8,9 +8,16 @@ class Player(entity.Entity):
     def __init__(self):
         super().__init__(x = WIDTH // 2, y = HEIGHT // 2, width=100, height=100, image_path="src/sprites/player.png")
         # stats
-        self.max_hp = 20
+        self.vigor = 11
+        self.strength = 10
+        self.dexterity = 10
+        self.intelligence = 10
+        self.endurance = 11
+        ####
+        
+        self.max_hp = 3
         self.current_hp = self.max_hp
-        self.hp_regen = 0 # dodac
+        self.hp_regen = 1 # dodac
         self.melee_dmg = 0 # dodac
         self.ranged_dmg = 0 # dodac
         self.magic_dmg = 0 # dodac
@@ -27,6 +34,8 @@ class Player(entity.Entity):
         
         # time
         self.last_time_attack = pygame.time.get_ticks()
+        self.last_time_hp_regen = pygame.time.get_ticks()
+        self.last_time_damaged = pygame.time.get_ticks()
         self.last_hit_time = 0
         self.hit_cooldown = 1000
 
@@ -60,6 +69,15 @@ class Player(entity.Entity):
         # move only in screen
         self.x = max(0, min(WIDTH - self.width, self.x))
         self.y = max(0, min(HEIGHT - self.height, self.y))
+        
+    def take_damage(self, dmg):
+        self.current_hp -= dmg
+        if self.current_hp < 0:
+            self.current_hp = 0
+            
+        now = pygame.time.get_ticks()
+        self.last_time_damaged = now
+        self.last_time_hp_regen = now
 
     def attack(self, enemies):
         # attack cooldown
@@ -87,6 +105,20 @@ class Player(entity.Entity):
     def check_level_up(self):
         return self.exp >= self.exp_needed
     
+    def regen_hp(self):
+        # cooldown
+        current_time = pygame.time.get_ticks()
+        time_since_last_damage = (current_time - self.last_time_damaged) / 1000
+        time_since_last_regen = (current_time - self.last_time_hp_regen) / 1000
+
+        if self.hp_regen > 0 and self.current_hp < self.max_hp and time_since_last_damage >= 5 and time_since_last_regen >= 5:
+            self.current_hp += 1
+            
+            if self.current_hp > self.max_hp:
+                self.current_hp = self.max_hp
+            self.last_time_hp_regen = current_time
+            print("Player hp regened for 1")
+    
     def level_up(self):
         self.level += 1
         self.pending_level_ups += 3
@@ -104,14 +136,14 @@ class Player(entity.Entity):
         self.speed = upgrade_preview_stats["Speed"]
         
     def reset_stats(self):
-        self.max_hp = 3
+        self.max_hp = 300
         self.current_hp = self.max_hp
-        self.hp_regen = 0
+        self.hp_regen = 1
         self.melee_dmg = 0
         self.ranged_dmg = 0
         self.magic_dmg = 0
-        self.damage = 2
-        self.attack_speed = 1
+        self.damage = 20
+        self.attack_speed = 15
         self.range = 500
         self.armor = 1
         self.speed = 3
