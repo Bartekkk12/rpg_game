@@ -7,14 +7,6 @@ from settings import WIDTH, HEIGHT
 class Player(entity.Entity):
     def __init__(self):
         super().__init__(x = WIDTH // 2, y = HEIGHT // 2, width=100, height=100, image_path="src/sprites/player.png")
-        # stats
-        self.vigor = 11
-        self.strength = 10
-        self.dexterity = 10
-        self.intelligence = 10
-        self.endurance = 11
-        ####
-        
         self.max_hp = 3
         self.current_hp = self.max_hp
         self.hp_regen = 1 # dodac
@@ -32,6 +24,11 @@ class Player(entity.Entity):
         self.exp_needed = 30
         self.gold = 0
         
+        # weapons
+        self.weapons = []
+        self.MAX_WEAPONS = 4
+        self.current_weapons = 0
+        
         # time
         self.last_time_attack = pygame.time.get_ticks()
         self.last_time_hp_regen = pygame.time.get_ticks()
@@ -39,7 +36,7 @@ class Player(entity.Entity):
         self.last_hit_time = 0
         self.hit_cooldown = 1000
 
-    # overrided function
+    # override function
     def get_rect(self):
         return pygame.Rect(self.x + 10, self.y + 10, self.width - 20, self.height - 20)
     
@@ -135,16 +132,43 @@ class Player(entity.Entity):
         self.armor = upgrade_preview_stats["Armor"]
         self.speed = upgrade_preview_stats["Speed"]
         
+    def draw_weapons(self, screen):
+        weapon_size = 70
+        spacing = 10
+        cx = self.x + self.width // 2
+        cy = self.y + self.height // 2
+
+        offsets = []
+        if len(self.weapons) == 1:
+            offsets = [(0, -weapon_size//2 - spacing)]
+        elif len(self.weapons) == 2:
+            offsets = [(-weapon_size//2 - spacing, -weapon_size//3),
+                    (weapon_size//2 + spacing, -weapon_size//3)]
+        elif len(self.weapons) == 3:
+            offsets = [(-weapon_size//2 - spacing, 0),
+                    (weapon_size//2 + spacing, 0),
+                    (0, -weapon_size//2 - spacing)]
+        elif len(self.weapons) == 4:
+            offsets = [(-weapon_size//2 - spacing, -weapon_size//3),
+                    (weapon_size//2 + spacing, -weapon_size//3),
+                    (-weapon_size//2 - spacing, weapon_size//3),
+                    (weapon_size//2 + spacing, weapon_size//3)]
+
+        for weapon, (ox, oy) in zip(self.weapons, offsets):
+            wx = cx + ox - weapon_size//2
+            wy = cy + oy - weapon_size//2
+            screen.surface.blit(weapon.image, (wx, wy))
+    
     def reset_stats(self):
-        self.max_hp = 300
+        self.max_hp = 3
         self.current_hp = self.max_hp
         self.hp_regen = 1
         self.melee_dmg = 0
         self.ranged_dmg = 0
         self.magic_dmg = 0
         self.damage = 20
-        self.attack_speed = 15
-        self.range = 500
+        self.attack_speed = 1
+        self.range = 150
         self.armor = 1
         self.speed = 3
         self.level = 1

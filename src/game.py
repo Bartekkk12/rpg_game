@@ -5,7 +5,8 @@ from screen import *
 from player import *
 from enemy import *
 from gold import *
-from settings import TITLE
+from profile import *
+from weapon import *
 
 class Game:
     def __init__(self):
@@ -32,11 +33,16 @@ class Game:
         
         # player
         self.player = Player()
+        self.player.weapons.append(Magic_Weapon("pyromancy_flame"))
+        self.player.weapons.append(Magic_Weapon("pistol"))
 
         # enemies
         self.enemies = []
         self.max_enemies = 3
         self.dead_enemies_loot = []
+        
+        # projectiles
+        self.projectiles = []
 
     def game(self):
         self.screen.fill_game_background()
@@ -58,7 +64,7 @@ class Game:
                 loot.draw(self.screen)
                 loot.draw_hit_box(self.screen, (0, 0, 255)) # debugging
 
-        # drawe enemies
+        # draw enemies
         for enemy in self.enemies[:]:
             enemy.follow_player(self.player)
             enemy.draw(self.screen)
@@ -71,13 +77,45 @@ class Game:
                     Gold(enemy.x, enemy.y, enemy.enemy_type["gold"], enemy.enemy_type["exp"])
                 )
 
-            enemy.attack(self.player)
+            enemy.attack(self.player)       
+            
+        # projectiles
+        weapon_sides = []
+        if len(self.player.weapons) == 1:
+            weapon_sides = ["left"]
+        elif len(self.player.weapons) == 2:
+            weapon_sides = ["left", "right"]
+        elif len(self.player.weapons) == 3:
+            weapon_sides = ["left", "right", "left"]
+        elif len(self.player.weapons) == 4:
+            weapon_sides = ["left", "right", "left", "right"]
+        else:
+            weapon_sides = ["left"] * len(self.player.weapons)
+
+        for weapon, side in zip(self.player.weapons, weapon_sides):
+            projectile = weapon.attack(self.player, self.enemies, side)
+            if projectile:
+                self.projectiles.append(projectile)
+
+        for projectile in self.projectiles[:]:
+            projectile.update(self.enemies)
+            projectile.draw_hit_box(self.screen, (255, 0, 0))
+            for enemy in self.enemies[:]:
+                if projectile.get_rect().colliderect(enemy.get_rect()):
+                    enemy.current_hp -= projectile.damage
+                    print(f"Projectille hit enemy for {projectile.damage}")
+                    self.projectiles.remove(projectile)
+                    break
+            else:
+                if projectile.should_remove(self.screen._width, self.screen._height):
+                    self.projectiles.remove(projectile) 
 
         # player 
         self.player.move(keys)
         self.player.draw(self.screen)
-        self.player.attack(self.enemies)
-        self.player.regen_hp()
+        self.player.draw_weapons(self.screen)
+        #self.player.attack(self.enemies)
+        self.player.regen_hp()  
         self.player.draw_hit_box(self.screen, (0, 255, 0))  # debugging
 
         # round state
@@ -283,3 +321,4 @@ class Game:
             self.upgrade_preview_stats["Armor"] += direction
         elif upgrade_id == "Speed":
             self.upgrade_preview_stats["Speed"] += 0.4 * direction
+            

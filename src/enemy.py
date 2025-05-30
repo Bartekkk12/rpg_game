@@ -5,7 +5,7 @@ import entity
 ENEMIES = {
     "zombie_cabbage": {"max_hp": 3, "speed": 2, "damage": 2, "attack_speed": 1, "range": 50, "exp": 8, "gold": 5, "sprite": "src/sprites/enemies/zombie_cabbage.png"},
     "rotten_carrot": {"max_hp": 1, "speed": 4, "damage": 1, "attack_speed": 1.5, "range": 50, "exp": 2, "gold": 2, "sprite": "src/sprites/enemies/rotten_carrot.png"},
-    
+    "vampire_garlic": {"max_hp": 5, "speed": 3, "damage": 2, "attack_speed": 1, "range": 50, "exp": 10, "gold": 15, "sprite": "src/sprites/enemies/vampire_garlic.png"}
 }
 
 class Enemy(entity.Entity):
