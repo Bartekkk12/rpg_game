@@ -132,32 +132,71 @@ class Player(entity.Entity):
         self.armor = upgrade_preview_stats["Armor"]
         self.speed = upgrade_preview_stats["Speed"]
         
-    def draw_weapons(self, screen):
+    @staticmethod
+    def get_angle_to_enemy(weapon_x, weapon_y, enemies):
+        if not enemies:
+            return 0
+        
+        nearest = min(enemies, key=lambda e: (e.x + e.width//2 - weapon_x)**2 + (e.y + e.height//2 - weapon_y)**2)
+        dx = (nearest.x + nearest.width//2) - weapon_x
+        dy = (nearest.y + nearest.height//2) - weapon_y
+        angle = math.degrees(math.atan2(-dy, dx))
+        return angle
+    
+    @staticmethod
+    def clamp_angle(angle, side):
+        angle = (angle + 360) % 360
+        if side == "right":
+            if angle > 90 and angle < 270:
+                if angle < 180:
+                    angle = 90
+                else:
+                    angle = 270
+        elif side == "left":
+            if angle < 90 or angle > 270:
+                if angle < 180:
+                    angle = 90
+                else:
+                    angle = 270
+        return angle
+            
+    def draw_weapons(self, screen, enemies=None):
         weapon_size = 70
         spacing = 10
         cx = self.x + self.width // 2
         cy = self.y + self.height // 2
 
         offsets = []
+        sides = []
         if len(self.weapons) == 1:
             offsets = [(0, -weapon_size//2 - spacing)]
+            sides = ["left"]
         elif len(self.weapons) == 2:
             offsets = [(-weapon_size//2 - spacing, -weapon_size//3),
                     (weapon_size//2 + spacing, -weapon_size//3)]
+            sides = ["left", "right"]
         elif len(self.weapons) == 3:
             offsets = [(-weapon_size//2 - spacing, 0),
                     (weapon_size//2 + spacing, 0),
                     (0, -weapon_size//2 - spacing)]
+            sides = ["left", "right", "left"]
         elif len(self.weapons) == 4:
             offsets = [(-weapon_size//2 - spacing, -weapon_size//3),
                     (weapon_size//2 + spacing, -weapon_size//3),
                     (-weapon_size//2 - spacing, weapon_size//3),
                     (weapon_size//2 + spacing, weapon_size//3)]
+            sides = ["left", "right", "left", "right"]
 
-        for weapon, (ox, oy) in zip(self.weapons, offsets):
+        for weapon, (ox, oy), side in zip(self.weapons, offsets, sides):
             wx = cx + ox - weapon_size//2
             wy = cy + oy - weapon_size//2
-            screen.surface.blit(weapon.image, (wx, wy))
+            angle = 0
+            if enemies is not None and len(enemies) > 0:
+                angle = self.get_angle_to_enemy(wx + weapon_size//2, wy + weapon_size//2, enemies)
+                angle = self.clamp_angle(angle, side)
+            rotated_image = pygame.transform.rotate(weapon.image, angle)
+            rotated_rect = rotated_image.get_rect(center=(wx + weapon_size//2, wy + weapon_size//2))
+            screen.surface.blit(rotated_image, rotated_rect.topleft)
     
     def reset_stats(self):
         self.max_hp = 3
@@ -168,7 +207,7 @@ class Player(entity.Entity):
         self.magic_dmg = 0
         self.damage = 20
         self.attack_speed = 1
-        self.range = 150
+        self.range = 50
         self.armor = 1
         self.speed = 3
         self.level = 1

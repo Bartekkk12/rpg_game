@@ -34,7 +34,8 @@ class Game:
         # player
         self.player = Player()
         self.player.weapons.append(Magic_Weapon("pyromancy_flame"))
-        self.player.weapons.append(Magic_Weapon("pistol"))
+        self.player.weapons.append(Ranged_Weapon("pistol"))
+        #self.player.weapons.append(Magic_Weapon("magic_wand"))
 
         # enemies
         self.enemies = []
@@ -99,7 +100,8 @@ class Game:
 
         for projectile in self.projectiles[:]:
             projectile.update(self.enemies)
-            projectile.draw_hit_box(self.screen, (255, 0, 0))
+            #projectile.draw_hit_box(self.screen, (255, 0, 0))
+            projectile.draw(self.screen)
             for enemy in self.enemies[:]:
                 if projectile.get_rect().colliderect(enemy.get_rect()):
                     enemy.current_hp -= projectile.damage
@@ -113,7 +115,7 @@ class Game:
         # player 
         self.player.move(keys)
         self.player.draw(self.screen)
-        self.player.draw_weapons(self.screen)
+        self.player.draw_weapons(self.screen, self.enemies)
         #self.player.attack(self.enemies)
         self.player.regen_hp()  
         self.player.draw_hit_box(self.screen, (0, 255, 0))  # debugging
