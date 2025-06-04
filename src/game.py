@@ -33,7 +33,7 @@ class Game:
         
         # player
         self.player = Player()
-        self.player.weapons.append(Magic_Weapon("pyromancy_flame"))
+        #self.player.weapons.append(Magic_Weapon("pyromancy_flame"))
         self.player.weapons.append(Ranged_Weapon("pistol"))
         #self.player.weapons.append(Magic_Weapon("magic_wand"))
 
@@ -83,7 +83,7 @@ class Game:
         # projectiles
         weapon_sides = []
         if len(self.player.weapons) == 1:
-            weapon_sides = ["left"]
+            weapon_sides = ["center"]
         elif len(self.player.weapons) == 2:
             weapon_sides = ["left", "right"]
         elif len(self.player.weapons) == 3:

@@ -6,17 +6,17 @@ from settings import WIDTH, HEIGHT
 
 class Player(entity.Entity):
     def __init__(self):
-        super().__init__(x = WIDTH // 2, y = HEIGHT // 2, width=100, height=100, image_path="src/sprites/player.png")
+        super().__init__(x=WIDTH // 2, y=HEIGHT // 2, width=100, height=100, image_path="src/sprites/player.png")
         self.max_hp = 3
         self.current_hp = self.max_hp
-        self.hp_regen = 1 # dodac
-        self.melee_dmg = 0 # dodac
-        self.ranged_dmg = 0 # dodac
-        self.magic_dmg = 0 # dodac
-        self.damage = 2 # dodac
+        self.hp_regen = 1
+        self.melee_dmg = 0
+        self.ranged_dmg = 0
+        self.magic_dmg = 0
+        self.damage = 2
         self.attack_speed = 1
         self.range = 500
-        self.armor = 1 # dodac
+        self.armor = 1
         self.speed = 3
         self.level = 1
         self.pending_level_ups = 0
@@ -36,15 +36,13 @@ class Player(entity.Entity):
         self.last_hit_time = 0
         self.hit_cooldown = 1000
 
-    # override function
     def get_rect(self):
         return pygame.Rect(self.x + 10, self.y + 10, self.width - 20, self.height - 20)
-    
+
     def move(self, keys):
         move_x = 0
         move_y = 0
 
-        # get input
         if keys[pygame.K_w] or keys[pygame.K_UP]:
             move_y -= 1
         if keys[pygame.K_s] or keys[pygame.K_DOWN]:
@@ -54,7 +52,6 @@ class Player(entity.Entity):
         if keys[pygame.K_d] or keys[pygame.K_RIGHT]:
             move_x += 1
 
-        # set same speed diagonally
         if move_x != 0 or move_y != 0:
             length = (move_x ** 2 + move_y ** 2) ** 0.5
             move_x /= length
@@ -63,7 +60,6 @@ class Player(entity.Entity):
         self.x += move_x * self.speed
         self.y += move_y * self.speed
 
-        # move only in screen
         self.x = max(0, min(WIDTH - self.width, self.x))
         self.y = max(0, min(HEIGHT - self.height, self.y))
         
@@ -77,17 +73,14 @@ class Player(entity.Entity):
         self.last_time_hp_regen = now
 
     def attack(self, enemies):
-        # attack cooldown
         current_time = pygame.time.get_ticks()
         time_since_last_attack = (current_time - self.last_time_attack) / 1000
 
-        # check if enemy in range
         enemies_in_range = []
         for enemy in enemies:
             if self.distance_to(enemy) <= self.range:
                 enemies_in_range.append(enemy)
 
-        # attack enemy
         if enemies_in_range and time_since_last_attack >= 1 / self.attack_speed:
             closest_enemy = min(enemies_in_range, key=lambda enemy: self.distance_to(enemy))
             closest_enemy.current_hp -= self.damage
@@ -103,14 +96,12 @@ class Player(entity.Entity):
         return self.exp >= self.exp_needed
     
     def regen_hp(self):
-        # cooldown
         current_time = pygame.time.get_ticks()
         time_since_last_damage = (current_time - self.last_time_damaged) / 1000
         time_since_last_regen = (current_time - self.last_time_hp_regen) / 1000
 
         if self.hp_regen > 0 and self.current_hp < self.max_hp and time_since_last_damage >= 5 and time_since_last_regen >= 5:
             self.current_hp += 1
-            
             if self.current_hp > self.max_hp:
                 self.current_hp = self.max_hp
             self.last_time_hp_regen = current_time
@@ -131,13 +122,28 @@ class Player(entity.Entity):
         self.range = upgrade_preview_stats["Range"]
         self.armor = upgrade_preview_stats["Armor"]
         self.speed = upgrade_preview_stats["Speed"]
-        
+
     @staticmethod
-    def get_angle_to_enemy(weapon_x, weapon_y, enemies):
-        if not enemies:
+    def filter_enemies_by_side(weapon_x, enemies, side):
+        filtered = []
+        for e in enemies:
+            ex = e.x + e.width // 2
+            dx = ex - weapon_x
+            if side == "left" and dx < 0:
+                filtered.append(e)
+            elif side == "right" and dx > 0:
+                filtered.append(e)
+        return filtered
+
+    @staticmethod
+    def get_angle_to_enemy(weapon_x, weapon_y, enemies, side="center"):
+        filtered_enemies = Player.filter_enemies_by_side(weapon_x, enemies, side) if side in ("left", "right") else enemies
+        target_list = filtered_enemies if filtered_enemies else enemies
+
+        if not target_list:
             return 0
         
-        nearest = min(enemies, key=lambda e: (e.x + e.width//2 - weapon_x)**2 + (e.y + e.height//2 - weapon_y)**2)
+        nearest = min(target_list, key=lambda e: (e.x + e.width//2 - weapon_x)**2 + (e.y + e.height//2 - weapon_y)**2)
         dx = (nearest.x + nearest.width//2) - weapon_x
         dy = (nearest.y + nearest.height//2) - weapon_y
         angle = math.degrees(math.atan2(-dy, dx))
@@ -147,17 +153,11 @@ class Player(entity.Entity):
     def clamp_angle(angle, side):
         angle = (angle + 360) % 360
         if side == "right":
-            if angle > 90 and angle < 270:
-                if angle < 180:
-                    angle = 90
-                else:
-                    angle = 270
+            if 90 < angle < 270:
+                angle = 90 if angle < 180 else 270
         elif side == "left":
             if angle < 90 or angle > 270:
-                if angle < 180:
-                    angle = 90
-                else:
-                    angle = 270
+                angle = 90 if angle < 180 else 270
         return angle
             
     def draw_weapons(self, screen, enemies=None):
@@ -170,7 +170,7 @@ class Player(entity.Entity):
         sides = []
         if len(self.weapons) == 1:
             offsets = [(0, -weapon_size//2 - spacing)]
-            sides = ["left"]
+            sides = ["center"]
         elif len(self.weapons) == 2:
             offsets = [(-weapon_size//2 - spacing, -weapon_size//3),
                     (weapon_size//2 + spacing, -weapon_size//3)]
@@ -192,12 +192,15 @@ class Player(entity.Entity):
             wy = cy + oy - weapon_size//2
             angle = 0
             if enemies is not None and len(enemies) > 0:
-                angle = self.get_angle_to_enemy(wx + weapon_size//2, wy + weapon_size//2, enemies)
+                angle = self.get_angle_to_enemy(wx + weapon_size//2, wy + weapon_size//2, enemies, side)
                 angle = self.clamp_angle(angle, side)
-            rotated_image = pygame.transform.rotate(weapon.image, angle)
+            weapon_img = weapon.image
+            rotated_image = pygame.transform.rotate(weapon_img, angle)
+            if side == "left":
+                rotated_image = pygame.transform.flip(rotated_image, True, False)
             rotated_rect = rotated_image.get_rect(center=(wx + weapon_size//2, wy + weapon_size//2))
             screen.surface.blit(rotated_image, rotated_rect.topleft)
-    
+
     def reset_stats(self):
         self.max_hp = 3
         self.current_hp = self.max_hp
@@ -214,4 +217,4 @@ class Player(entity.Entity):
         self.pending_level_ups = 0
         self.exp = 0
         self.exp_needed = 30
-        self.gold = 0
+        self.gold = 0 
