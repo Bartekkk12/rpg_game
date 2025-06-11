@@ -29,7 +29,8 @@ class Projectile(entity.Entity):
     def should_remove(self, screen_width, screen_height):
         if (self.x < 0 or self.x > screen_width or self.y < 0 or self.y > screen_height):
             return True
-        if self.travelled > self.range:
+        
+        if self.homing and (self.target is None):
             return True
         return False
         
@@ -46,10 +47,13 @@ class Projectile(entity.Entity):
         dx = (enemy.x + enemy.width//2) - (self.x + self.width//2)
         dy = (enemy.y + enemy.height//2) - (self.y + self.height//2)
         distance = hypot(dx, dy)
+        
         if distance == 0:
             return
+        
         dx /= distance
         dy /= distance
+        
         self.x += dx * self.speed
         self.y += dy * self.speed
         self.travelled += self.speed

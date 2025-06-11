@@ -36,6 +36,7 @@ class Game:
         self.player.weapons.append(Magic_Weapon("pyromancy_flame"))
         self.player.weapons.append(Ranged_Weapon("pistol"))
         #self.player.weapons.append(Magic_Weapon("magic_wand"))
+        #self.player.weapons.append(Melee_Weapon("scythe"))
 
         # enemies
         self.enemies = []
@@ -80,7 +81,7 @@ class Game:
 
             enemy.attack(self.player)       
             
-        # projectiles
+        # place weapons
         weapon_sides = []
         if len(self.player.weapons) == 1:
             weapon_sides = ["center"]
@@ -93,6 +94,7 @@ class Game:
         else:
             weapon_sides = ["left"] * len(self.player.weapons)
 
+        # projectiles
         for weapon, side in zip(self.player.weapons, weapon_sides):
             projectile = weapon.attack(self.player, self.enemies, side)
             if projectile:
@@ -104,7 +106,7 @@ class Game:
             for enemy in self.enemies[:]:
                 if projectile.get_rect().colliderect(enemy.get_rect()):
                     enemy.current_hp -= projectile.damage
-                    print(f"Projectille hit enemy for {projectile.damage}")
+                    print(f"Projectile hit enemy for {projectile.damage}")
                     self.projectiles.remove(projectile)
                     break
             else:
@@ -217,7 +219,7 @@ class Game:
                 if not pygame.mixer.music.get_busy() or self.current_ost != "menu":
                     pygame.mixer.music.load(self.menu_ost)
                     pygame.mixer.music.play(-1)
-                    pygame.mixer.music.set_volume(0.2)
+                    pygame.mixer.music.set_volume(0) # debugging
                     self.current_ost = "menu"
                 self.screen.menu(self.selected_option)
             elif self.state == "game":
@@ -225,7 +227,7 @@ class Game:
                 if not pygame.mixer.music.get_busy() or self.current_ost != "game":
                     pygame.mixer.music.load(self.game_ost)
                     pygame.mixer.music.play(-1)
-                    pygame.mixer.music.set_volume(0.02)
+                    pygame.mixer.music.set_volume(0) # debugging
                     self.current_ost = "game"
                 self.game()
             elif self.state == "level_up":
@@ -246,6 +248,7 @@ class Game:
         # round start
         self.dead_enemies_loot.clear()
         self.player.current_hp = self.player.max_hp
+        self.player.current_armor = self.player.max_armor
         self.enemies = []
         self.round_in_progress = True
         enemy_count = self.max_enemies + self.round * 2
@@ -287,7 +290,7 @@ class Game:
             "Magic Damage": self.player.magic_dmg,
             "Attack Speed": self.player.attack_speed,
             "Range": self.player.range,
-            "Armor": self.player.armor,
+            "Armor": self.player.max_armor,
             "Speed": self.player.speed
         }
 
@@ -299,7 +302,7 @@ class Game:
             "Magic Damage": self.player.magic_dmg,
             "Attack Speed": self.player.attack_speed,
             "Range": self.player.range,
-            "Armor": self.player.armor,
+            "Armor": self.player.max_armor,
             "Speed": self.player.speed
         }
         if direction == -1:

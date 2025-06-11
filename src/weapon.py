@@ -3,27 +3,65 @@ from projectile import *
 from player import *
 
 WEAPONS = {
-    "pistol": {"damage": 1, "attack_speed": 1.5, "range": 300, "projectile_speed": 20, "sprite": "src/sprites/weapons/pistol.png", "sound": "src/sprites/sounds/pistol_shot_sound.wav", "projectile": "src/sprites/weapons/bullet.png"}, 
+    "pistol": {"damage": 1, "attack_speed": 1.5, "range": 300, "projectile_speed": 20, "sprite": "src/sprites/weapons/pistol.png", "sound": "src/sprites/sounds/pistol_shot_sound.wav", "sound_volume": 0.1, "projectile": "src/sprites/weapons/bullet.png"}, 
     "sword": {"damage": 5, "attack_speed": 1.5, "range": 150, "sprite": "src/sprites/weapons/sword.png"},
-    "pyromancy_flame": {"damage": 5, "attack_speed": 0.5, "range": 300, "projectile_speed": 7, "sprite": "src/sprites/weapons/pyromancy_flame.png", "sound": "src/sprites/sounds/fire_ball_sound.wav", "projectile": "src/sprites/weapons/fire_ball.png"}, 
-    "magic_wand": {"damage": 10, "attack_speed": 0.5, "range": 300, "projectile_speed": 7, "sprite": "src/sprites/weapons/magic_wand.png", "sound": "src/sprites/sounds/fire_ball_sound.wav", "projectile": "src/sprites/weapons/magic_bullet.png"}, 
+    "scythe": {"damage": 15, "attack_speed": 0.5, "range": 200, "sprite": "src/sprites/weapons/scythe.png", "sound": "src/sprites/sounds/scythe_slash.wav", "sound_volume": 2},
+    "pyromancy_flame": {"damage": 5, "attack_speed": 0.5, "range": 300, "projectile_speed": 7, "sprite": "src/sprites/weapons/pyromancy_flame.png", "sound": "src/sprites/sounds/fire_ball_sound.wav", "sound_volume": 0.1, "projectile": "src/sprites/weapons/fire_ball.png"}, 
+    "magic_wand": {"damage": 10, "attack_speed": 0.5, "range": 300, "projectile_speed": 7, "sprite": "src/sprites/weapons/magic_wand.png", "sound": "src/sprites/sounds/fire_ball_sound.wav", "sound_volume": 0.1, "projectile": "src/sprites/weapons/magic_bullet.png"}, 
 
 }
 
 class Weapon:
     def __init__(self, weapon_type):
         self.weapon_type = WEAPONS[weapon_type]
-        self.damage = self.weapon_type["damage"]
+        self.damage = self.weapon_type["damage"] # Zmienic na typy dmg!
         self.attack_speed = self.weapon_type["attack_speed"]
         self.range = self.weapon_type["range"]
         self.image = pygame.transform.scale(pygame.image.load(self.weapon_type["sprite"]), (70, 70))
         self.sound = pygame.mixer.Sound(self.weapon_type.get("sound", ""))
-        self.sound.set_volume(0.1)
+        self.sound.set_volume(self.weapon_type["sound_volume"])
         self.last_attack_time = pygame.time.get_ticks()
         
     def play_sound(self):
         if self.sound:
             self.sound.play()
+            
+class Melee_Weapon(Weapon):
+    def __init__(self, weapon_type):
+        super().__init__(weapon_type)
+        
+    def attack(self, player, enemies, side=None):
+        current_time = pygame.time.get_ticks()
+        cooldown = int(1000 / self.attack_speed)
+        
+        if current_time - self.last_attack_time >= cooldown and enemies:
+            px = player.x + player.width // 2
+            py = player.y + player.height // 2
+            
+            if side == "left":
+                filtered_enemies = [e for e in enemies if e.x + e.width // 2 < px]
+            elif side == "right":
+                filtered_enemies = [e for e in enemies if e.x + e.width // 2 >= px]
+            else:
+                filtered_enemies = enemies
+
+            target_list = filtered_enemies if filtered_enemies else enemies
+
+            if not target_list:
+                return None
+            
+            nearest = min(target_list, key=lambda e: ((e.x + e.width//2 - px)**2 + (e.y + e.height//2 - py)**2))
+            ex = nearest.x + nearest.width // 2
+            ey = nearest.y + nearest.height
+            dist = ((ex - px)**2 + (ey - py)**2) ** 0.5
+                
+            if dist <= self.range:
+                nearest.current_hp -= self.damage
+                print(f"Melee Weapon hit enemy for {self.damage}")
+                self.play_sound()
+                
+            self.last_attack_time = current_time
+
 
 class Ranged_Weapon(Weapon):
     def __init__(self, weapon_type):
@@ -90,8 +128,6 @@ class Magic_Weapon(Weapon):
 
             if not target_list:
                 return None
-
-            nearest = min(target_list, key=lambda e: ((e.x + e.width//2 - px)**2 + (e.y + e.height//2 - py)**2))
 
             self.play_sound()
 

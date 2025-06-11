@@ -32,6 +32,7 @@ class Screen:
         self.display_current_enemies_count(enemies)
         self.display_player_current_hp(player)
         self.display_player_current_level(player)
+        self.display_player_current_armor(player)
         self.display_player_gold(player)
         
     def menu(self, selected_option):
@@ -89,13 +90,30 @@ class Screen:
         font = pygame.font.Font(None, 28)
         text = font.render(f"lvl.{player.level}", True, (255, 255, 255))
         self.surface.blit(text, (100, 48))
+        
+    def display_player_current_armor(self, player):
+        bar_width = 200
+        bar_height = 25
+        bar_x = 10
+        bar_y = 80
+        
+        armor_ratio = player.current_armor / player.max_armor
+        armor_bar_width = int(bar_width * armor_ratio)
+        
+        pygame.draw.rect(self.surface, (0, 0, 0), (bar_x - 2, bar_y - 2, bar_width + 4, bar_height + 4))
+        pygame.draw.rect(self.surface, (128, 128, 128), (bar_x, bar_y, bar_width, bar_height))
+        pygame.draw.rect(self.surface, (80, 80, 80), (bar_x, bar_y, armor_bar_width, bar_height))
+        
+        font = pygame.font.Font(None, 28)
+        text = font.render(f"Armor.{player.current_armor}", True, (255, 255, 255))
+        self.surface.blit(text, (80, 83))
 
     def display_player_gold(self, player):
         gold_exp = pygame.transform.scale(pygame.image.load("src/sprites/gold_exp.png"), (50, 50))
         font = pygame.font.Font(None, 36)
         text = font.render(f"{player.gold}", True, (255, 255, 255))
-        self.surface.blit(gold_exp, (5, 70))
-        self.surface.blit(text, (55, 88))
+        self.surface.blit(gold_exp, (5, 110))
+        self.surface.blit(text, (55, 128))
 
     def display_current_round(self, round):
         font = pygame.font.Font(None, 36)
@@ -162,7 +180,7 @@ class Screen:
             "Magic Damage": player.magic_dmg,
             "Attack Speed": round(player.attack_speed, 2),
             "Range": player.range,
-            "Armor": player.armor,
+            "Armor": player.max_armor,
             "Speed": round(player.speed, 2)
         }
         

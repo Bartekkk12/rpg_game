@@ -13,10 +13,10 @@ class Player(entity.Entity):
         self.melee_dmg = 0
         self.ranged_dmg = 0
         self.magic_dmg = 0
-        self.damage = 2
         self.attack_speed = 1
         self.range = 500
-        self.armor = 1
+        self.max_armor = 1
+        self.current_armor = self.max_armor
         self.speed = 3
         self.level = 1
         self.pending_level_ups = 0
@@ -64,7 +64,11 @@ class Player(entity.Entity):
         self.y = max(0, min(HEIGHT - self.height, self.y))
         
     def take_damage(self, dmg):
-        self.current_hp -= dmg
+        if self.current_armor > 0:
+            self.current_armor -= dmg
+        else: 
+            self.current_armor = 0
+            self.current_hp -= dmg
         if self.current_hp < 0:
             self.current_hp = 0
             
@@ -120,7 +124,7 @@ class Player(entity.Entity):
         self.magic_dmg = upgrade_preview_stats["Magic Damage"]
         self.attack_speed = upgrade_preview_stats["Attack Speed"]
         self.range = upgrade_preview_stats["Range"]
-        self.armor = upgrade_preview_stats["Armor"]
+        self.max_armor = upgrade_preview_stats["Armor"]
         self.speed = upgrade_preview_stats["Speed"]
 
     @staticmethod
@@ -208,10 +212,10 @@ class Player(entity.Entity):
         self.melee_dmg = 0
         self.ranged_dmg = 0
         self.magic_dmg = 0
-        self.damage = 20
         self.attack_speed = 1
         self.range = 50
-        self.armor = 1
+        self.max_armor = 4
+        self.current_armor = self.max_armor
         self.speed = 3
         self.level = 1
         self.pending_level_ups = 0
