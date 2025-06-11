@@ -33,7 +33,7 @@ class Game:
         
         # player
         self.player = Player()
-        #self.player.weapons.append(Magic_Weapon("pyromancy_flame"))
+        self.player.weapons.append(Magic_Weapon("pyromancy_flame"))
         self.player.weapons.append(Ranged_Weapon("pistol"))
         #self.player.weapons.append(Magic_Weapon("magic_wand"))
 
@@ -100,7 +100,6 @@ class Game:
 
         for projectile in self.projectiles[:]:
             projectile.update(self.enemies)
-            #projectile.draw_hit_box(self.screen, (255, 0, 0))
             projectile.draw(self.screen)
             for enemy in self.enemies[:]:
                 if projectile.get_rect().colliderect(enemy.get_rect()):
