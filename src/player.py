@@ -45,12 +45,16 @@ class Player(entity.Entity):
 
         if keys[pygame.K_w] or keys[pygame.K_UP]:
             move_y -= 1
+            self.image = pygame.transform.flip(self.fliped_image, True, False)
         if keys[pygame.K_s] or keys[pygame.K_DOWN]:
             move_y += 1
+            self.image = pygame.transform.flip(self.fliped_image, True, False)
         if keys[pygame.K_a] or keys[pygame.K_LEFT]:
             move_x -= 1
+            self.image = self.fliped_image
         if keys[pygame.K_d] or keys[pygame.K_RIGHT]:
             move_x += 1
+            self.image = pygame.transform.flip(self.fliped_image, True, False)
 
         if move_x != 0 or move_y != 0:
             length = (move_x ** 2 + move_y ** 2) ** 0.5

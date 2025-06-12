@@ -3,10 +3,12 @@ import random
 
 from screen import *
 from player import *
-from enemy import *
+from enemy import Enemy
 from gold import *
 from profile import *
 from weapon import *
+from shop import *
+from item import Item
 
 class Game:
     def __init__(self):
@@ -35,8 +37,8 @@ class Game:
         self.player = Player()
         self.player.weapons.append(Magic_Weapon("pyromancy_flame"))
         self.player.weapons.append(Ranged_Weapon("pistol"))
-        #self.player.weapons.append(Magic_Weapon("magic_wand"))
-        #self.player.weapons.append(Melee_Weapon("scythe"))
+        self.player.weapons.append(Magic_Weapon("magic_wand"))
+        self.player.weapons.append(Melee_Weapon("scythe"))
 
         # enemies
         self.enemies = []
@@ -45,6 +47,9 @@ class Game:
         
         # projectiles
         self.projectiles = []
+        
+        # Shop
+        self.shop = Shop()
 
     def game(self):
         self.screen.fill_game_background()
@@ -132,7 +137,7 @@ class Game:
                     self.generate_upgrade_options()
                     self.state = "level_up"
                 else:
-                    self.start_round()
+                    self.state = "shop"
         else:
             self.state = "game_over"
             
@@ -174,7 +179,7 @@ class Game:
                                     self.player.apply_upgrades(self.upgrade_preview_stats)
                                     self.player.pending_level_ups = 0
                                     self.start_round()
-                                    self.state = "game"
+                                    self.state = "shop"
                             elif event.key == pygame.K_d and self.player.pending_level_ups > 0:
                                 selected = self.upgrade_options[self.upgrade_selected]
                                 self.apply_preview_upgrade(selected["id"], 1)
@@ -212,6 +217,11 @@ class Game:
                                 self.state = "game"
                             elif self.selected_option == 2:
                                 self.state = "menu"
+                    # shop
+                    elif self.state == "shop":
+                        if event.key in (pygame.K_RETURN, pygame.K_KP_ENTER, pygame.K_SPACE):
+                            self.start_round()
+                            self.state = "game"
                         
             # game states
             if self.state == "menu":
@@ -233,6 +243,8 @@ class Game:
             elif self.state == "level_up":
                 pygame.mixer.music.stop()
                 self.screen.display_level_up_screen(self.upgrade_options, self.upgrade_selected, self.upgrade_preview_stats, self.player)
+            elif self.state == "shop":
+                self.screen.display_shop_screen(self.selected_option)
             elif self.state == "game_over":
                 pygame.mixer.music.stop()
                 self.screen.display_game_over_screen(self.round, self.selected_option, self.player)

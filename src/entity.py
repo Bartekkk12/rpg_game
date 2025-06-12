@@ -7,6 +7,7 @@ class Entity:
         self.width = width
         self.height = height
         self.image = pygame.transform.scale(pygame.image.load(image_path), (width, height)) if image_path else None
+        self.fliped_image = pygame.transform.flip(self.image, True, False)
         
     def get_rect(self):
         return pygame.Rect(self.x, self.y, self.width, self.height)

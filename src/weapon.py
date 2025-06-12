@@ -5,9 +5,9 @@ from player import *
 WEAPONS = {
     "pistol": {"damage": 1, "attack_speed": 1.5, "range": 300, "projectile_speed": 20, "sprite": "src/sprites/weapons/pistol.png", "sound": "src/sprites/sounds/pistol_shot_sound.wav", "sound_volume": 0.1, "projectile": "src/sprites/weapons/bullet.png"}, 
     "sword": {"damage": 5, "attack_speed": 1.5, "range": 150, "sprite": "src/sprites/weapons/sword.png"},
-    "scythe": {"damage": 15, "attack_speed": 0.5, "range": 200, "sprite": "src/sprites/weapons/scythe.png", "sound": "src/sprites/sounds/scythe_slash.wav", "sound_volume": 2},
+    "scythe": {"damage": 15, "attack_speed": 0.5, "range": 200, "sprite": "src/sprites/weapons/scythe.png", "sound": "src/sprites/sounds/scythe_slash.wav", "sound_volume": 4},
     "pyromancy_flame": {"damage": 5, "attack_speed": 0.5, "range": 300, "projectile_speed": 7, "sprite": "src/sprites/weapons/pyromancy_flame.png", "sound": "src/sprites/sounds/fire_ball_sound.wav", "sound_volume": 0.1, "projectile": "src/sprites/weapons/fire_ball.png"}, 
-    "magic_wand": {"damage": 10, "attack_speed": 0.5, "range": 300, "projectile_speed": 7, "sprite": "src/sprites/weapons/magic_wand.png", "sound": "src/sprites/sounds/fire_ball_sound.wav", "sound_volume": 0.1, "projectile": "src/sprites/weapons/magic_bullet.png"}, 
+    "magic_wand": {"damage": 10, "attack_speed": 0.3, "range": 300, "projectile_speed": 7, "sprite": "src/sprites/weapons/magic_wand.png", "sound": "src/sprites/sounds/fire_ball_sound.wav", "sound_volume": 0.1, "projectile": "src/sprites/weapons/magic_bullet.png"}, 
 
 }
 
@@ -45,11 +45,14 @@ class Melee_Weapon(Weapon):
             else:
                 filtered_enemies = enemies
 
-            target_list = filtered_enemies if filtered_enemies else enemies
+            if filtered_enemies:
+                target_list = filtered_enemies
+            else:
+                target_list = enemies
 
             if not target_list:
-                return None
-            
+                return None 
+                
             nearest = min(target_list, key=lambda e: ((e.x + e.width//2 - px)**2 + (e.y + e.height//2 - py)**2))
             ex = nearest.x + nearest.width // 2
             ey = nearest.y + nearest.height
@@ -84,10 +87,13 @@ class Ranged_Weapon(Weapon):
             else:
                 filtered_enemies = enemies
 
-            target_list = filtered_enemies if filtered_enemies else enemies
+            if filtered_enemies:
+                target_list = filtered_enemies
+            else:
+                target_list = enemies
 
             if not target_list:
-                return None
+                return None 
 
             nearest = min(target_list, key=lambda e: ((e.x + e.width//2 - px)**2 + (e.y + e.height//2 - py)**2))
             ex = nearest.x + nearest.width // 2
@@ -97,9 +103,10 @@ class Ranged_Weapon(Weapon):
             dist = (dx ** 2 + dy ** 2) ** 0.5
             direction = (dx / dist, dy / dist) if dist != 0 else (0, 0)
 
-            self.play_sound()
-            projectile = Projectile(x=px - 5, y=py - 5, width=10, height=10, speed=self.projectile_speed, damage=self.damage, range=self.range, image_path=self.projectile_image, direction=direction, homing=False)
+            
+            projectile = Projectile(x=px - 5, y=py - 5, width=10, height=10, speed=self.projectile_speed, damage=self.damage, range=self.range, image_path=self.projectile_image, direction=direction, homing=False, side=side)
             self.last_attack_time = current_time
+            self.play_sound()
             
             return projectile
         return None
@@ -113,26 +120,33 @@ class Magic_Weapon(Weapon):
     def attack(self, player, enemies, side=None):
         current_time = pygame.time.get_ticks()
         cooldown = int(1000 / self.attack_speed)
-        if current_time - self.last_attack_time >= cooldown and enemies:
-            px = player.x + player.width // 2
-            py = player.y + player.height // 2
+        if current_time - self.last_attack_time < cooldown or not enemies:
+            return None
+        
+        px = player.x + player.width // 2
+        py = player.y + player.height // 2
 
-            if side == "left":
-                filtered_enemies = [e for e in enemies if e.x + e.width // 2 < px]
-            elif side == "right":
-                filtered_enemies = [e for e in enemies if e.x + e.width // 2 >= px]
-            else:
-                filtered_enemies = enemies
+        if side == "left":
+            filtered_enemies = [e for e in enemies if e.x + e.width // 2 < px]
+        elif side == "right":
+            filtered_enemies = [e for e in enemies if e.x + e.width // 2 >= px]
+        else:
+            filtered_enemies = enemies
 
-            target_list = filtered_enemies if filtered_enemies else enemies
+        if filtered_enemies:
+            target_list = filtered_enemies
+        else:
+            target_list = enemies
 
-            if not target_list:
-                return None
+        if not target_list:
+            return None 
 
-            self.play_sound()
-
-            projectile = Projectile(x=px - 5, y=py - 5, width=40, height=40, speed=self.projectile_speed, damage=self.damage, range=self.range, image_path=self.projectile_image, direction=None, homing=True)
-            self.last_attack_time = current_time
-            
-            return projectile
-        return None
+        projectile = Projectile(
+            x=px - 5, y=py - 5, width=40, height=40,
+            speed=self.projectile_speed, damage=self.damage,
+            range=self.range, image_path=self.projectile_image,
+            direction=None, homing=True, side=side
+        )
+        self.last_attack_time = current_time
+        self.play_sound()
+        return projectile

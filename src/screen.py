@@ -213,3 +213,10 @@ class Screen:
         pending_levels = font.render(f"Pending upgrades: {player.pending_level_ups}", True, (255, 255, 255))
         self.surface.blit(pending_levels, (800, 200))
         
+    def display_shop_screen(self, selected_option):
+        self.surface.fill((30, 30, 30))
+        
+        font = pygame.font.Font(None, 36)
+        next_round_text = font.render("Idź do następnej rundy (Enter)", True, (255, 255, 0))
+        rect = next_round_text.get_rect(center=(self._width // 2, self._height - 100))
+        self.surface.blit(next_round_text, rect)
