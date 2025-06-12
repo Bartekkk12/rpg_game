@@ -1,9 +1,10 @@
 import pygame
 import random
+import math
 
 from screen import *
 from player import *
-from enemy import Enemy
+from enemy import Enemy, ENEMIES
 from gold import *
 from profile import *
 from weapon import *
@@ -24,6 +25,10 @@ class Game:
         self.selected_option = 1
         self.round = 1
         self.round_in_progress = False
+        self.round_time = 30  # seconds
+        self.round_timer = 0
+        self.enemy_spawn_interval = 0.5  # spawn every 0.5 seconds
+        self.enemy_spawn_timer = 0
         self.upgrade_options = []
         self.upgrade_selected = 0
         self.upgrade_preview_stats = {}
@@ -42,6 +47,7 @@ class Game:
 
         # enemies
         self.enemies = []
+        self.MAX_ENEMIES_ON_SCREEN = 100
         self.max_enemies = 3
         self.dead_enemies_loot = []
         
@@ -52,9 +58,34 @@ class Game:
         self.shop = Shop()
 
     def game(self):
+        dt = 1/60
+        
         self.screen.fill_game_background()
         keys = pygame.key.get_pressed()
+        
+        if self.round_in_progress:
+            self.round_timer += dt
+            self.enemy_spawn_timer += dt
 
+            # Spawn 1 enemy every enemy_spawn_interval, no round limit, until round ends (time)
+            if (self.enemy_spawn_timer >= self.enemy_spawn_interval
+                and len(self.enemies) < self.MAX_ENEMIES_ON_SCREEN):
+                self.enemy_spawn_timer = 0
+                self.spawn_enemies(1)
+
+            # end round after 30s (not earlier)
+            if self.round_timer > self.round_time:
+                self.round_in_progress = False
+                self.round += 1
+                if self.round > 20:
+                    self.state = "victory"
+                elif self.player.pending_level_ups > 0:
+                    self.generate_upgrade_options()
+                    self.state = "level_up"
+                else:
+                    self.state = "shop"
+                return
+                    
         # draw loot after killing enemy
         for loot in self.dead_enemies_loot[:]:
             # check for collision with player
@@ -127,22 +158,12 @@ class Game:
         self.player.draw_hit_box(self.screen, (0, 255, 0))  # debugging
 
         # round state
-        if self.player.current_hp > 0:
-            if self.round_in_progress and not self.enemies:
-                self.round_in_progress = False
-                self.round += 1
-                if self.round > 20:
-                    self.state = "victory"
-                elif self.player.pending_level_ups > 0:
-                    self.generate_upgrade_options()
-                    self.state = "level_up"
-                else:
-                    self.state = "shop"
-        else:
+        if self.player.current_hp <= 0:
             self.state = "game_over"
             
         # UI
-        self.screen.display_UI(self.player, self.enemies, self.round)
+        time_left = max(0, int(self.round_time - self.round_timer)) if self.round_in_progress else None
+        self.screen.display_UI(self.player, self.enemies, self.round, time_left)
 
     def run(self):
         while self.running:
@@ -257,30 +278,39 @@ class Game:
         pygame.quit()
 
     def start_round(self):
-        # round start
+        # clear loot and projectiles
         self.dead_enemies_loot.clear()
+        self.projectiles.clear()
+        
+        # reset player stats
         self.player.current_hp = self.player.max_hp
         self.player.current_armor = self.player.max_armor
+        
+        # reset enemies
         self.enemies = []
         self.round_in_progress = True
-        enemy_count = self.max_enemies + self.round * 2
+        
+        # reset timers
+        self.round_timer = 0
+        self.enemy_spawn_timer = 0
 
-        # draw enemies in random position
-        for _ in range(enemy_count):
-            while True:
+    def spawn_enemies(self, count):
+        spawned = 0
+        tries_limit = 100
+        max_enemies_on_screen = min(self.MAX_ENEMIES_ON_SCREEN, self.max_enemies + self.round * 2)
+        while spawned < count and len(self.enemies) < max_enemies_on_screen:
+            tries = 0
+            while tries < tries_limit:
                 x = random.randint(0, self.screen._width - 50)
                 y = random.randint(0, self.screen._height - 50)
-                
-                # draw enemy at lest 150 pixels away from player
                 dx = x - self.player.x
                 dy = y - self.player.y
                 distance = math.hypot(dx, dy)
                 if distance >= 150:
                     break
-                
-            ### draw random enemies!!!! ###
-            self.enemies.append(Enemy("zombie_cabbage", x, y))
-            ### draw random enemies!!!! ###
+                tries += 1
+            self.enemies.append(Enemy(random.choice(list(ENEMIES.keys())), x, y))
+            spawned += 1
 
     def generate_upgrade_options(self):
         self.max_pending_level_ups = self.player.pending_level_ups
@@ -337,4 +367,3 @@ class Game:
             self.upgrade_preview_stats["Armor"] += direction
         elif upgrade_id == "Speed":
             self.upgrade_preview_stats["Speed"] += 0.4 * direction
-            

@@ -3,9 +3,12 @@ import math
 import entity
 
 ENEMIES = {
-    "zombie_cabbage": {"max_hp": 3, "speed": 2, "damage": 2, "attack_speed": 1, "range": 50, "exp": 8, "gold": 5, "sprite": "src/sprites/enemies/zombie_cabbage.png"},
-    "rotten_carrot": {"max_hp": 1, "speed": 4, "damage": 1, "attack_speed": 1.5, "range": 50, "exp": 2, "gold": 2, "sprite": "src/sprites/enemies/rotten_carrot.png"},
-    "vampire_garlic": {"max_hp": 5, "speed": 3, "damage": 2, "attack_speed": 1, "range": 50, "exp": 10, "gold": 15, "sprite": "src/sprites/enemies/vampire_garlic.png"}
+    "zombie_cabbage": {"max_hp": 3, "speed": 3, "damage": 2, "attack_speed": 1, "range": 50, "exp": 8, "gold": 5, "sprite": "src/sprites/enemies/zombie_cabbage.png"},
+    "rotten_carrot": {"max_hp": 1, "speed": 5, "damage": 1, "attack_speed": 1.5, "range": 50, "exp": 2, "gold": 2, "sprite": "src/sprites/enemies/rotten_carrot.png"},
+    "vampire_garlic": {"max_hp": 5, "speed": 3, "damage": 2, "attack_speed": 1, "range": 50, "exp": 10, "gold": 15, "sprite": "src/sprites/enemies/vampire_garlic.png"},
+    "mutan_broccoli": {"max_hp": 10, "speed": 2, "damage": 5, "attack_speed": 0.7, "range": 50, "exp": 35, "gold": 20, "sprite": "src/sprites/enemies/mutant_broccoli.png"},
+    "mad_mushroom": {"max_hp": 4, "speed": 3, "damage": 3, "attack_speed": 1.5, "range": 50, "exp": 20, "gold": 10, "sprite": "src/sprites/enemies/mad_mushroom.png"},
+    #"onion_boss": {"max_hp": 150, "speed": 5, "damage": 15, "attack_speed": 1.5, "range": 100, "exp": 100, "gold": 100, "sprite": "src/sprites/enemies/onion_boss.png"},
 }
 
 class Enemy(entity.Entity):
@@ -20,6 +23,7 @@ class Enemy(entity.Entity):
         self.attack_speed = self.enemy_type["attack_speed"]
         self.range = self.enemy_type["range"]
         self.last_time_attack = pygame.time.get_ticks()
+        self.direction = ""
 
         self.rect = pygame.Rect(self.x, self.y, self.width, self.height)
 
@@ -34,7 +38,7 @@ class Enemy(entity.Entity):
         
         dx /= distance
         dy /= distance
-
+        
         self.x += dx * self.speed
         self.y += dy * self.speed
         

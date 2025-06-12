@@ -27,8 +27,8 @@ class Screen:
     def fill_game_background(self):
         self.surface.blit(self.game_background, (0, 0))
         
-    def display_UI(self, player, enemies, current_round):
-        self.display_current_round(current_round)
+    def display_UI(self, player, enemies, current_round, time_left=None):
+        self.display_current_round(current_round, time_left)
         self.display_current_enemies_count(enemies)
         self.display_player_current_hp(player)
         self.display_player_current_level(player)
@@ -115,12 +115,16 @@ class Screen:
         self.surface.blit(gold_exp, (5, 110))
         self.surface.blit(text, (55, 128))
 
-    def display_current_round(self, round):
+    def display_current_round(self, round, time_left=None):
         font = pygame.font.Font(None, 36)
         round_text = font.render(f"Round: {round}", True, (255, 255, 255))
         text_width = round_text.get_width()
         x_pos = (WIDTH - text_width) // 2
         self.surface.blit(round_text, (x_pos, 10))
+        
+        if time_left != None:
+            timer_text = font.render(f"{int(time_left)}s", True, (255, 255, 0))
+            self.surface.blit(timer_text, (x_pos, 45))
 
     def display_current_enemies_count(self, enemies):
         font = pygame.font.Font(None, 36)
