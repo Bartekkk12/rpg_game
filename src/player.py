@@ -10,12 +10,11 @@ class Player(entity.Entity):
         self.max_hp = 3
         self.current_hp = self.max_hp
         self.hp_regen = 1
-        self.melee_dmg = 0
-        self.ranged_dmg = 0
-        self.magic_dmg = 0
-        self.attack_speed = 1
-        self.range = 500
-        self.max_armor = 1
+        self.melee_dmg = 0 # dodac do skalowani z bronia
+        self.ranged_dmg = 0 # dodac do skalowani z bronia
+        self.magic_dmg = 0 # dodac do skalowani z bronia
+        self.range = 50 # dodac do skalowani z bronia
+        self.max_armor = 1 # zmienic na procentowy system
         self.current_armor = self.max_armor
         self.speed = 3
         self.level = 1
@@ -70,8 +69,9 @@ class Player(entity.Entity):
     def take_damage(self, dmg):
         if self.current_armor > 0:
             self.current_armor -= dmg
+            if self.current_armor < 0:
+                self.current_armor = 0
         else: 
-            self.current_armor = 0
             self.current_hp -= dmg
         if self.current_hp < 0:
             self.current_hp = 0
@@ -79,21 +79,6 @@ class Player(entity.Entity):
         now = pygame.time.get_ticks()
         self.last_time_damaged = now
         self.last_time_hp_regen = now
-
-    def attack(self, enemies):
-        current_time = pygame.time.get_ticks()
-        time_since_last_attack = (current_time - self.last_time_attack) / 1000
-
-        enemies_in_range = []
-        for enemy in enemies:
-            if self.distance_to(enemy) <= self.range:
-                enemies_in_range.append(enemy)
-
-        if enemies_in_range and time_since_last_attack >= 1 / self.attack_speed:
-            closest_enemy = min(enemies_in_range, key=lambda enemy: self.distance_to(enemy))
-            closest_enemy.current_hp -= self.damage
-            self.last_time_attack = current_time
-            print(f"Player attacked Enemy for {self.damage}")
 
     def distance_to(self, enemy):
         dx = self.x - enemy.x
@@ -126,7 +111,6 @@ class Player(entity.Entity):
         self.melee_dmg = upgrade_preview_stats["Melee Damage"]
         self.ranged_dmg = upgrade_preview_stats["Ranged Damage"]
         self.magic_dmg = upgrade_preview_stats["Magic Damage"]
-        self.attack_speed = upgrade_preview_stats["Attack Speed"]
         self.range = upgrade_preview_stats["Range"]
         self.max_armor = upgrade_preview_stats["Armor"]
         self.speed = upgrade_preview_stats["Speed"]
@@ -216,7 +200,6 @@ class Player(entity.Entity):
         self.melee_dmg = 0
         self.ranged_dmg = 0
         self.magic_dmg = 0
-        self.attack_speed = 1
         self.range = 50
         self.max_armor = 4
         self.current_armor = self.max_armor

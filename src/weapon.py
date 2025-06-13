@@ -3,9 +3,15 @@ from projectile import *
 from player import *
 
 WEAPONS = {
-    "pistol": {"damage": 1, "attack_speed": 1.5, "range": 300, "projectile_speed": 20, "sprite": "src/sprites/weapons/pistol.png", "sound": "src/sprites/sounds/pistol_shot_sound.wav", "sound_volume": 0.1, "projectile": "src/sprites/weapons/bullet.png"}, 
-    "sword": {"damage": 5, "attack_speed": 1.5, "range": 150, "sprite": "src/sprites/weapons/sword.png"},
-    "scythe": {"damage": 15, "attack_speed": 0.5, "range": 200, "sprite": "src/sprites/weapons/scythe.png", "sound": "src/sprites/sounds/scythe_slash.wav", "sound_volume": 4},
+    "pistol": {"level": 1, "damage": 1, "attack_speed": 1.5, "range": 300, "projectile_speed": 20, "sprite": "src/sprites/weapons/pistol.png", "sound": "src/sprites/sounds/pistol_shot_sound.wav", "sound_volume": 0.1, "projectile": "src/sprites/weapons/bullet.png",
+               "damage/upgrade": 1, "attack_speed/upgrade": 0.3, "projectile_speed/upgrade": 2},
+     
+    "sword": {"level": 1, "damage": 3, "attack_speed": 1, "range": 150, "sprite": "src/sprites/weapons/sword.png", "sound": "src/sprites/sounds/scythe_slash.wav", "sound_volume": 4,
+              "damage/upgrade": 1.5, "attack_speed/upgrade": 0.1, "range/upgrade": 15},
+    
+    "scythe": {"level": 1, "damage": 6, "attack_speed": 0.5, "range": 200, "sprite": "src/sprites/weapons/scythe.png", "sound": "src/sprites/sounds/scythe_slash.wav", "sound_volume": 4,
+               "damage/upgrade": 2.2, "attack_speed/upgrade": 0.1, "range/upgrade": 15},
+    
     "pyromancy_flame": {"damage": 5, "attack_speed": 0.5, "range": 300, "projectile_speed": 7, "sprite": "src/sprites/weapons/pyromancy_flame.png", "sound": "src/sprites/sounds/fire_ball_sound.wav", "sound_volume": 0.1, "projectile": "src/sprites/weapons/fire_ball.png"}, 
     "magic_wand": {"damage": 10, "attack_speed": 0.3, "range": 300, "projectile_speed": 7, "sprite": "src/sprites/weapons/magic_wand.png", "sound": "src/sprites/sounds/fire_ball_sound.wav", "sound_volume": 0.1, "projectile": "src/sprites/weapons/magic_bullet.png"}, 
 

@@ -27,7 +27,7 @@ class Game:
         self.round_in_progress = False
         self.round_time = 30  # seconds
         self.round_timer = 0
-        self.enemy_spawn_interval = 0.5  # spawn every 0.5 seconds
+        self.enemy_spawn_interval = 0.8 # enemies spawn rate
         self.enemy_spawn_timer = 0
         self.upgrade_options = []
         self.upgrade_selected = 0
@@ -40,10 +40,10 @@ class Game:
         
         # player
         self.player = Player()
-        self.player.weapons.append(Magic_Weapon("pyromancy_flame"))
+        #self.player.weapons.append(Magic_Weapon("pyromancy_flame"))
         self.player.weapons.append(Ranged_Weapon("pistol"))
-        self.player.weapons.append(Magic_Weapon("magic_wand"))
-        self.player.weapons.append(Melee_Weapon("scythe"))
+        #self.player.weapons.append(Magic_Weapon("magic_wand"))
+        #self.player.weapons.append(Melee_Weapon("scythe"))
 
         # enemies
         self.enemies = []
@@ -298,6 +298,7 @@ class Game:
         spawned = 0
         tries_limit = 100
         max_enemies_on_screen = min(self.MAX_ENEMIES_ON_SCREEN, self.max_enemies + self.round * 2)
+        available_enemies = [name for name, data in ENEMIES.items() if data["spawn_wave"] <= self.round]
         while spawned < count and len(self.enemies) < max_enemies_on_screen:
             tries = 0
             while tries < tries_limit:
@@ -309,8 +310,9 @@ class Game:
                 if distance >= 150:
                     break
                 tries += 1
-            self.enemies.append(Enemy(random.choice(list(ENEMIES.keys())), x, y))
-            spawned += 1
+            if available_enemies:
+                self.enemies.append(Enemy(random.choice(available_enemies), x, y, self.round))
+                spawned += 1
 
     def generate_upgrade_options(self):
         self.max_pending_level_ups = self.player.pending_level_ups
@@ -319,7 +321,6 @@ class Game:
             {"id": "Melee Damage"},
             {"id": "Ranged Damage"},
             {"id": "Magic Damage"},
-            {"id": "Attack Speed"},
             {"id": "Range"},
             {"id": "Armor"},
             {"id": "Speed"},
@@ -330,7 +331,6 @@ class Game:
             "Melee Damage": self.player.melee_dmg,
             "Ranged Damage": self.player.ranged_dmg,
             "Magic Damage": self.player.magic_dmg,
-            "Attack Speed": self.player.attack_speed,
             "Range": self.player.range,
             "Armor": self.player.max_armor,
             "Speed": self.player.speed
@@ -342,7 +342,6 @@ class Game:
             "Melee Damage": self.player.melee_dmg,
             "Ranged Damage": self.player.ranged_dmg,
             "Magic Damage": self.player.magic_dmg,
-            "Attack Speed": self.player.attack_speed,
             "Range": self.player.range,
             "Armor": self.player.max_armor,
             "Speed": self.player.speed
@@ -359,8 +358,6 @@ class Game:
             self.upgrade_preview_stats["Ranged Damage"] += direction
         elif upgrade_id == "Magic Damage":
             self.upgrade_preview_stats["Magic Damage"] += direction
-        elif upgrade_id == "Attack Speed":
-            self.upgrade_preview_stats["Attack Speed"] += 0.1 * direction
         elif upgrade_id == "Range":
             self.upgrade_preview_stats["Range"] += direction
         elif upgrade_id == "Armor":

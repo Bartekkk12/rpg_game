@@ -182,7 +182,6 @@ class Screen:
             "Melee Damage": player.melee_dmg,
             "Ranged Damage": player.ranged_dmg,
             "Magic Damage": player.magic_dmg,
-            "Attack Speed": round(player.attack_speed, 2),
             "Range": player.range,
             "Armor": player.max_armor,
             "Speed": round(player.speed, 2)
@@ -206,7 +205,7 @@ class Screen:
             upgrade_id = option["id"]
             current_val = upgrade_preview_stats[upgrade_id]
 
-            if upgrade_id in ("Attack Speed", "Speed"):
+            if upgrade_id in ("Speed"):
                 preview_text = f"{upgrade_id}: {current_val:.1f}"
             else:
                 preview_text = f"{upgrade_id}: {int(current_val)}"
@@ -221,6 +220,6 @@ class Screen:
         self.surface.fill((30, 30, 30))
         
         font = pygame.font.Font(None, 36)
-        next_round_text = font.render("Idź do następnej rundy (Enter)", True, (255, 255, 0))
+        next_round_text = font.render("Next round (enter)", True, (255, 255, 0))
         rect = next_round_text.get_rect(center=(self._width // 2, self._height - 100))
         self.surface.blit(next_round_text, rect)
