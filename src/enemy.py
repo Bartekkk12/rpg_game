@@ -4,15 +4,15 @@ import entity
 
 ENEMIES = {
     # first wave appearing 1
-    "zombie_cabbage": {"max_hp": 3, "speed": 3, "damage": 1, "attack_speed": 1, "range": 50, "exp": 1, "gold": 1, "sprite": "src/sprites/enemies/zombie_cabbage.png", "size": 80,
+    "zombie_cabbage": {"max_hp": 5, "speed": 3, "damage": 1, "attack_speed": 1, "range": 50, "exp": 1, "gold": 1, "sprite": "src/sprites/enemies/zombie_cabbage.png", "size": 80,
                        "hp+/wave": 2, "dmg+/wave": 1, "spawn_wave": 1},
     
     # first wave appearing 1
-    "rotten_carrot": {"max_hp": 1, "speed": 9, "damage": 1, "attack_speed": 1, "range": 50, "exp": 1, "gold": 1, "sprite": "src/sprites/enemies/rotten_carrot.png", "size": 80,
+    "rotten_carrot": {"max_hp": 2, "speed": 9, "damage": 1, "attack_speed": 1, "range": 50, "exp": 1, "gold": 1, "sprite": "src/sprites/enemies/rotten_carrot.png", "size": 80,
                       "hp+/wave": 1, "dmg+/wave": 1, "spawn_wave": 1},
                           
     # first wave appearing 2
-    "vampire_garlic": {"max_hp": 2, "speed": 3, "damage": 2, "attack_speed": 1, "range": 50, "exp": 4, "gold": 4, "sprite": "src/sprites/enemies/vampire_garlic.png", "size": 80,
+    "vampire_garlic": {"max_hp": 6, "speed": 3, "damage": 2, "attack_speed": 1, "range": 50, "exp": 4, "gold": 4, "sprite": "src/sprites/enemies/vampire_garlic.png", "size": 80,
                        "hp+/wave": 2, "dmg+/wave": 1, "spawn_wave": 2},
     
     # first wave appearing 4

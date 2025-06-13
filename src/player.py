@@ -10,9 +10,9 @@ class Player(entity.Entity):
         self.max_hp = 3
         self.current_hp = self.max_hp
         self.hp_regen = 1
-        self.melee_dmg = 0 # dodac do skalowani z bronia
-        self.ranged_dmg = 0 # dodac do skalowani z bronia
-        self.magic_dmg = 0 # dodac do skalowani z bronia
+        self.melee_dmg = 1
+        self.ranged_dmg = 1
+        self.magic_dmg = 1
         self.range = 50 # dodac do skalowani z bronia
         self.max_armor = 1 # zmienic na procentowy system
         self.current_armor = self.max_armor
@@ -197,9 +197,9 @@ class Player(entity.Entity):
         self.max_hp = 3
         self.current_hp = self.max_hp
         self.hp_regen = 1
-        self.melee_dmg = 0
-        self.ranged_dmg = 0
-        self.magic_dmg = 0
+        self.melee_dmg = 1
+        self.ranged_dmg = 1
+        self.magic_dmg = 1
         self.range = 50
         self.max_armor = 4
         self.current_armor = self.max_armor

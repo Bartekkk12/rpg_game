@@ -20,7 +20,6 @@ WEAPONS = {
 class Weapon:
     def __init__(self, weapon_type):
         self.weapon_type = WEAPONS[weapon_type]
-        self.damage = self.weapon_type["damage"] # Zmienic na typy dmg!
         self.attack_speed = self.weapon_type["attack_speed"]
         self.range = self.weapon_type["range"]
         self.image = pygame.transform.scale(pygame.image.load(self.weapon_type["sprite"]), (70, 70))
@@ -65,6 +64,7 @@ class Melee_Weapon(Weapon):
             dist = ((ex - px)**2 + (ey - py)**2) ** 0.5
                 
             if dist <= self.range:
+                self.damage = self.weapon_type["damage"] + player.melee_dmg
                 nearest.current_hp -= self.damage
                 print(f"Melee Weapon hit enemy for {self.damage}")
                 self.play_sound()
@@ -109,8 +109,13 @@ class Ranged_Weapon(Weapon):
             dist = (dx ** 2 + dy ** 2) ** 0.5
             direction = (dx / dist, dy / dist) if dist != 0 else (0, 0)
 
-            
-            projectile = Projectile(x=px - 5, y=py - 5, width=10, height=10, speed=self.projectile_speed, damage=self.damage, range=self.range, image_path=self.projectile_image, direction=direction, homing=False, side=side)
+            self.damage = self.weapon_type["damage"] + player.ranged_dmg
+            projectile = Projectile(
+                x=px - 5, y=py - 5, width=10, height=10,
+                speed=self.projectile_speed, damage=self.damage,
+                range=self.range, image_path=self.projectile_image,
+                direction=direction, homing=False, side=side
+                )
             self.last_attack_time = current_time
             self.play_sound()
             
@@ -147,6 +152,7 @@ class Magic_Weapon(Weapon):
         if not target_list:
             return None 
 
+        self.damage = self.weapon_type["damage"] + player.magic_dmg
         projectile = Projectile(
             x=px - 5, y=py - 5, width=40, height=40,
             speed=self.projectile_speed, damage=self.damage,

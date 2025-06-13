@@ -68,8 +68,7 @@ class Game:
             self.enemy_spawn_timer += dt
 
             # Spawn 1 enemy every enemy_spawn_interval, no round limit, until round ends (time)
-            if (self.enemy_spawn_timer >= self.enemy_spawn_interval
-                and len(self.enemies) < self.MAX_ENEMIES_ON_SCREEN):
+            if (self.enemy_spawn_timer >= self.enemy_spawn_interval and len(self.enemies) < self.MAX_ENEMIES_ON_SCREEN):
                 self.enemy_spawn_timer = 0
                 self.spawn_enemies(1)
 
@@ -153,7 +152,6 @@ class Game:
         self.player.move(keys)
         self.player.draw(self.screen)
         self.player.draw_weapons(self.screen, self.enemies)
-        #self.player.attack(self.enemies)
         self.player.regen_hp()  
         self.player.draw_hit_box(self.screen, (0, 255, 0))  # debugging
 
