@@ -1,6 +1,7 @@
 import pygame
 
 from settings import *
+from item import ITEMS
 
 class Screen:
     def __init__(self):
@@ -216,10 +217,48 @@ class Screen:
         pending_levels = font.render(f"Pending upgrades: {player.pending_level_ups}", True, (255, 255, 255))
         self.surface.blit(pending_levels, (800, 200))
         
-    def display_shop_screen(self, selected_option):
+    def display_shop_screen(self, shop_selection, items):
         self.surface.fill((30, 30, 30))
-        
         font = pygame.font.Font(None, 36)
-        next_round_text = font.render("Next round (enter)", True, (255, 255, 0))
+        title = font.render("Shop - Choose an item", True, (255, 255, 255))
+        self.surface.blit(title, (self._width // 2 - title.get_width() // 2, 60))
+        
+        item_width = int(self._width * 0.18)
+        item_height = int(self._height * 0.45)
+        spacing = int(self._width * 0.03)
+        
+        total_items_width = 4 * item_width + 3 * spacing
+        start_x = (self._width - total_items_width) // 2
+        y = self._height // 2 - item_height // 2
+        
+        for i, item_key in enumerate(items):
+            item = ITEMS[item_key]
+            rect_x = start_x + i * (item_width + spacing)
+            rect = pygame.Rect(rect_x, y, item_width, item_height)
+            color = (255, 255, 0) if shop_selection == i else (100, 100, 100)
+            pygame.draw.rect(self.surface, color, rect, border_radius=12)
+            pygame.draw.rect(self.surface, (255, 255, 255), rect, 3, border_radius=12)
+            
+            if item["image_path"]:
+                img = pygame.transform.scale(pygame.image.load(item["image_path"]), (100, 100))
+                img_x = rect_x + (item_width - 100) // 2
+                img_y = y + 10
+                self.surface.blit(img, (img_x, img_y))
+            
+            item_font = pygame.font.Font(None, 28)
+            name_text = item_font.render(item_key.replace('_', ' ').title(), True, (0, 0, 0))
+            self.surface.blit(name_text, (rect_x + 10, y + 120))
+
+            price_text = item_font.render(f"{item['base_price']} gold", True, (255, 215, 0))
+            self.surface.blit(price_text, (rect_x + 10, y + 150))
+
+            effect = next((f"+{v} {k.replace('_gain_value','').replace('_',' ')}"
+                        for k, v in item.items() if k.endswith("_gain_value")), "")
+            effect_text = item_font.render(effect, True, (50, 255, 100))
+            self.surface.blit(effect_text, (rect_x + 10, y + 175))
+        
+        # Draw "Next round" button at bottom, highlighted if shop_selection == 4
+        next_round_color = (255, 255, 0) if shop_selection == 4 else (255, 255, 255)
+        next_round_text = font.render("Next round (enter)", True, next_round_color)
         rect = next_round_text.get_rect(center=(self._width // 2, self._height - 100))
         self.surface.blit(next_round_text, rect)

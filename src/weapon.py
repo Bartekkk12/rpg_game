@@ -5,20 +5,26 @@ from player import *
 WEAPONS = {
     "pistol": {"level": 1, "damage": 1, "attack_speed": 1.5, "range": 300, "projectile_speed": 20, "sprite": "src/sprites/weapons/pistol.png", "sound": "src/sprites/sounds/pistol_shot_sound.wav", "sound_volume": 0.1, "projectile": "src/sprites/weapons/bullet.png",
                "damage/upgrade": 1, "attack_speed/upgrade": 0.3, "projectile_speed/upgrade": 2},
+    
+    "bow": {"level": 1, "damage": 3, "attack_speed": 0.5, "range": 300, "projectile_speed": 20, "sprite": "src/sprites/weapons/bow.png", "sound": "src/sprites/sounds/bow_release.wav", "sound_volume": 0.5, "projectile": "src/sprites/weapons/arrow.png",
+               "damage/upgrade": 1.5, "attack_speed/upgrade": 0.1, "projectile_speed/upgrade": 3},
      
-    "sword": {"level": 1, "damage": 3, "attack_speed": 1, "range": 150, "sprite": "src/sprites/weapons/sword.png", "sound": "src/sprites/sounds/scythe_slash.wav", "sound_volume": 4,
+    "sword": {"level": 1, "damage": 4, "attack_speed": 1, "range": 150, "sprite": "src/sprites/weapons/sword.png", "sound": "src/sprites/sounds/scythe_slash.wav", "sound_volume": 4,
               "damage/upgrade": 1.5, "attack_speed/upgrade": 0.1, "range/upgrade": 15},
     
     "scythe": {"level": 1, "damage": 6, "attack_speed": 0.5, "range": 200, "sprite": "src/sprites/weapons/scythe.png", "sound": "src/sprites/sounds/scythe_slash.wav", "sound_volume": 4,
                "damage/upgrade": 2.2, "attack_speed/upgrade": 0.1, "range/upgrade": 15},
     
-    "pyromancy_flame": {"damage": 5, "attack_speed": 0.5, "range": 300, "projectile_speed": 7, "sprite": "src/sprites/weapons/pyromancy_flame.png", "sound": "src/sprites/sounds/fire_ball_sound.wav", "sound_volume": 0.1, "projectile": "src/sprites/weapons/fire_ball.png"}, 
-    "magic_wand": {"damage": 10, "attack_speed": 0.3, "range": 300, "projectile_speed": 7, "sprite": "src/sprites/weapons/magic_wand.png", "sound": "src/sprites/sounds/fire_ball_sound.wav", "sound_volume": 0.1, "projectile": "src/sprites/weapons/magic_bullet.png"}, 
-
+    "pyromancy_flame": {"damage": 2.5, "attack_speed": 0.5, "range": 300, "projectile_speed": 7, "sprite": "src/sprites/weapons/pyromancy_flame.png", "sound": "src/sprites/sounds/fire_ball_sound.wav", "sound_volume": 0.1, "projectile": "src/sprites/weapons/fire_ball.png",
+               "damage/upgrade": 1.1, "attack_speed/upgrade": 0.2, "range/upgrade": 15},
+    
+    "magic_wand": {"damage": 1, "attack_speed": 1.5, "range": 300, "projectile_speed": 7, "sprite": "src/sprites/weapons/magic_wand.png", "sound": "src/sprites/sounds/fire_ball_sound.wav", "sound_volume": 0.1, "projectile": "src/sprites/weapons/magic_bullet.png",
+                   "damage/upgrade": 1, "attack_speed/upgrade": 0.3, "range/upgrade": 15}, 
 }
 
 class Weapon:
     def __init__(self, weapon_type):
+        self.weapon_name = weapon_type
         self.weapon_type = WEAPONS[weapon_type]
         self.attack_speed = self.weapon_type["attack_speed"]
         self.range = self.weapon_type["range"]
@@ -108,10 +114,14 @@ class Ranged_Weapon(Weapon):
             dy = ey - py
             dist = (dx ** 2 + dy ** 2) ** 0.5
             direction = (dx / dist, dy / dist) if dist != 0 else (0, 0)
+            
+            # change projectile size
+            width = 50 if self.weapon_name == "bow" else 10
+            height = 50 if self.weapon_name == "bow" else 10
 
             self.damage = self.weapon_type["damage"] + player.ranged_dmg
             projectile = Projectile(
-                x=px - 5, y=py - 5, width=10, height=10,
+                x=px - 5, y=py - 5, width=width, height=height,
                 speed=self.projectile_speed, damage=self.damage,
                 range=self.range, image_path=self.projectile_image,
                 direction=direction, homing=False, side=side

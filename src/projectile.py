@@ -1,6 +1,7 @@
 import entity
 import pygame
-from math import hypot
+
+from math import hypot, atan2, degrees
 
 class Projectile(entity.Entity):
     def __init__(self, x, y, width, height, speed, damage, range, image_path, direction=None, homing=False, target_pos=None, side="center"):
@@ -16,6 +17,8 @@ class Projectile(entity.Entity):
         self.last_direction = direction
         self.lost_target = False
         self.side = side
+        self.base_image = pygame.transform.scale(pygame.image.load(image_path), (width, height))
+
         
     def update(self, enemies):
         if self.homing and not self.lost_target:
@@ -86,3 +89,16 @@ class Projectile(entity.Entity):
         dx = (self.x + self.width//2) - (enemy.x + enemy.width//2)
         dy = (self.y + self.height//2) - (enemy.y + enemy.height//2)
         return hypot(dx, dy)
+    
+    def draw(self, screen):
+        direction = self.last_direction if self.homing else self.direction
+        if direction is not None and direction != (0, 0):
+            import math
+            angle_rad = math.atan2(-direction[1], direction[0])
+            angle_deg = math.degrees(angle_rad)
+        else:
+            angle_deg = 0
+
+        rotated_image = pygame.transform.rotate(self.base_image, angle_deg)
+        rotated_rect = rotated_image.get_rect(center=(self.x + self.width // 2, self.y + self.height // 2))
+        screen.surface.blit(rotated_image, rotated_rect)

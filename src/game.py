@@ -42,6 +42,7 @@ class Game:
         self.player = Player()
         #self.player.weapons.append(Magic_Weapon("pyromancy_flame"))
         self.player.weapons.append(Ranged_Weapon("pistol"))
+        self.player.weapons.append(Ranged_Weapon("bow"))
         #self.player.weapons.append(Magic_Weapon("magic_wand"))
         #self.player.weapons.append(Melee_Weapon("scythe"))
 
@@ -56,6 +57,8 @@ class Game:
         
         # Shop
         self.shop = Shop()
+        self.shop_selection = 0
+        self.last_item_selection = 0
 
     def game(self):
         dt = 1/60
@@ -82,6 +85,8 @@ class Game:
                     self.generate_upgrade_options()
                     self.state = "level_up"
                 else:
+                    self.shop.roll_items()
+                    self.shop_selection = 0
                     self.state = "shop"
                 return
                     
@@ -198,6 +203,8 @@ class Game:
                                     self.player.apply_upgrades(self.upgrade_preview_stats)
                                     self.player.pending_level_ups = 0
                                     self.start_round()
+                                    self.shop.roll_items()
+                                    self.shop_selection = 0
                                     self.state = "shop"
                             elif event.key == pygame.K_d and self.player.pending_level_ups > 0:
                                 selected = self.upgrade_options[self.upgrade_selected]
@@ -238,9 +245,26 @@ class Game:
                                 self.state = "menu"
                     # shop
                     elif self.state == "shop":
-                        if event.key in (pygame.K_RETURN, pygame.K_KP_ENTER, pygame.K_SPACE):
-                            self.start_round()
-                            self.state = "game"
+                        if event.key in (pygame.K_a, pygame.K_LEFT):
+                            if self.shop_selection in range(1, 4):
+                                self.shop_selection -= 1
+                        elif event.key in (pygame.K_d, pygame.K_RIGHT):
+                            if self.shop_selection in range(0, 3):
+                                self.shop_selection += 1
+                        elif event.key in (pygame.K_s, pygame.K_DOWN):
+                            if self.shop_selection in range(0, 4):
+                                self.last_item_selection = self.shop_selection
+                                self.shop_selection = 4
+                        elif event.key in (pygame.K_w, pygame.K_UP):
+                            if self.shop_selection == 4:
+                                self.shop_selection = self.last_item_selection
+                        elif event.key in (pygame.K_RETURN, pygame.K_KP_ENTER, pygame.K_SPACE):
+                            if self.shop_selection in range(0, 4):
+                                # kupno itemu
+                                item_key = self.shop.current_items[self.shop_selection]
+                            elif self.shop_selection == 4:
+                                self.start_round()
+                                self.state = "game"
                         
             # game states
             if self.state == "menu":
@@ -263,7 +287,7 @@ class Game:
                 pygame.mixer.music.stop()
                 self.screen.display_level_up_screen(self.upgrade_options, self.upgrade_selected, self.upgrade_preview_stats, self.player)
             elif self.state == "shop":
-                self.screen.display_shop_screen(self.selected_option)
+                self.screen.display_shop_screen(self.shop_selection, self.shop.current_items)
             elif self.state == "game_over":
                 pygame.mixer.music.stop()
                 self.screen.display_game_over_screen(self.round, self.selected_option, self.player)
