@@ -260,8 +260,18 @@ class Game:
                                 self.shop_selection = self.last_item_selection
                         elif event.key in (pygame.K_RETURN, pygame.K_KP_ENTER, pygame.K_SPACE):
                             if self.shop_selection in range(0, 4):
-                                # kupno itemu
+                                # buying item
                                 item_key = self.shop.current_items[self.shop_selection]
+                                item_info = ITEMS[item_key]
+                                price = item_info["base_price"]
+                                
+                                if self.player.gold >= price:
+                                    self.player.gold -= price
+                                    item = Item(item_key)
+                                    item.apply_upgrades(self.player)
+                                    self.shop.current_items[self.shop_selection] = None
+                                else:
+                                    print("Not enough gold")
                             elif self.shop_selection == 4:
                                 self.start_round()
                                 self.state = "game"

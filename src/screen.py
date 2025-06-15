@@ -232,20 +232,27 @@ class Screen:
         y = self._height // 2 - item_height // 2
         
         for i, item_key in enumerate(items):
-            item = ITEMS[item_key]
             rect_x = start_x + i * (item_width + spacing)
             rect = pygame.Rect(rect_x, y, item_width, item_height)
             color = (255, 255, 0) if shop_selection == i else (100, 100, 100)
             pygame.draw.rect(self.surface, color, rect, border_radius=12)
             pygame.draw.rect(self.surface, (255, 255, 255), rect, 3, border_radius=12)
-            
+
+            item_font = pygame.font.Font(None, 28)
+
+            if item_key is None:
+                bought_text = item_font.render("KUPIONO", True, (128, 128, 128))
+                self.surface.blit(bought_text, (rect_x + item_width // 2 - bought_text.get_width() // 2, y + item_height // 2 - bought_text.get_height() // 2))
+                continue
+
+            item = ITEMS[item_key]
+
             if item["image_path"]:
                 img = pygame.transform.scale(pygame.image.load(item["image_path"]), (100, 100))
                 img_x = rect_x + (item_width - 100) // 2
                 img_y = y + 10
                 self.surface.blit(img, (img_x, img_y))
             
-            item_font = pygame.font.Font(None, 28)
             name_text = item_font.render(item_key.replace('_', ' ').title(), True, (0, 0, 0))
             self.surface.blit(name_text, (rect_x + 10, y + 120))
 
@@ -257,7 +264,7 @@ class Screen:
             effect_text = item_font.render(effect, True, (50, 255, 100))
             self.surface.blit(effect_text, (rect_x + 10, y + 175))
         
-        # Draw "Next round" button at bottom, highlighted if shop_selection == 4
+        # Next round button
         next_round_color = (255, 255, 0) if shop_selection == 4 else (255, 255, 255)
         next_round_text = font.render("Next round (enter)", True, next_round_color)
         rect = next_round_text.get_rect(center=(self._width // 2, self._height - 100))
