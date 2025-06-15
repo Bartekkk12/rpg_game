@@ -1,41 +1,53 @@
 import pygame
+
 from projectile import *
 from player import *
+from assets import *
 
 WEAPONS = {
-    "pistol": {"level": 1, "damage": 1, "attack_speed": 1.5, "range": 300, "projectile_speed": 20, "sprite": "src/sprites/weapons/pistol.png", "sound": "src/sprites/sounds/pistol_shot_sound.wav", "sound_volume": 0.1, "projectile": "src/sprites/weapons/bullet.png",
+    "pistol": {"level": 1, "base_price": 20, "damage": 1, "attack_speed": 1.5, "range": 300, "projectile_speed": 20, "sprite": "src/sprites/weapons/pistol.png", "sound": "src/sprites/sounds/pistol_shot_sound.wav", "sound_volume": 0.1, "projectile": "src/sprites/weapons/bullet.png",
                "damage/upgrade": 1, "attack_speed/upgrade": 0.3, "projectile_speed/upgrade": 2},
     
-    "bow": {"level": 1, "damage": 3, "attack_speed": 0.5, "range": 300, "projectile_speed": 20, "sprite": "src/sprites/weapons/bow.png", "sound": "src/sprites/sounds/bow_release.wav", "sound_volume": 0.5, "projectile": "src/sprites/weapons/arrow.png",
+    "bow": {"level": 1, "base_price": 20, "damage": 3, "attack_speed": 0.5, "range": 300, "projectile_speed": 20, "sprite": "src/sprites/weapons/bow.png", "sound": "src/sprites/sounds/bow_release.wav", "sound_volume": 0.5, "projectile": "src/sprites/weapons/arrow.png",
                "damage/upgrade": 1.5, "attack_speed/upgrade": 0.1, "projectile_speed/upgrade": 3},
      
-    "sword": {"level": 1, "damage": 4, "attack_speed": 1, "range": 150, "sprite": "src/sprites/weapons/sword.png", "sound": "src/sprites/sounds/scythe_slash.wav", "sound_volume": 4,
+    "sword": {"level": 1, "base_price": 25, "damage": 4, "attack_speed": 1, "range": 150, "sprite": "src/sprites/weapons/sword.png", "sound": "src/sprites/sounds/scythe_slash.wav", "sound_volume": 4,
               "damage/upgrade": 1.5, "attack_speed/upgrade": 0.1, "range/upgrade": 15},
     
-    "scythe": {"level": 1, "damage": 6, "attack_speed": 0.5, "range": 200, "sprite": "src/sprites/weapons/scythe.png", "sound": "src/sprites/sounds/scythe_slash.wav", "sound_volume": 4,
+    "scythe": {"level": 1, "base_price": 30, "damage": 5, "attack_speed": 0.5, "range": 200, "sprite": "src/sprites/weapons/scythe.png", "sound": "src/sprites/sounds/scythe_slash.wav", "sound_volume": 4,
                "damage/upgrade": 2.2, "attack_speed/upgrade": 0.1, "range/upgrade": 15},
     
-    "pyromancy_flame": {"damage": 2.5, "attack_speed": 0.5, "range": 300, "projectile_speed": 7, "sprite": "src/sprites/weapons/pyromancy_flame.png", "sound": "src/sprites/sounds/fire_ball_sound.wav", "sound_volume": 0.1, "projectile": "src/sprites/weapons/fire_ball.png",
+    "pyromancy_flame": {"level": 1, "base_price": 23, "damage": 2.5, "attack_speed": 0.5, "range": 300, "projectile_speed": 7, "sprite": "src/sprites/weapons/pyromancy_flame.png", "sound": "src/sprites/sounds/fire_ball_sound.wav", "sound_volume": 0.1, "projectile": "src/sprites/weapons/fire_ball.png",
                "damage/upgrade": 1.1, "attack_speed/upgrade": 0.2, "range/upgrade": 15},
     
-    "magic_wand": {"damage": 1, "attack_speed": 1.5, "range": 300, "projectile_speed": 7, "sprite": "src/sprites/weapons/magic_wand.png", "sound": "src/sprites/sounds/fire_ball_sound.wav", "sound_volume": 0.1, "projectile": "src/sprites/weapons/magic_bullet.png",
+    "magic_wand": {"level": 1, "base_price": 28, "damage": 1, "attack_speed": 1.5, "range": 300, "projectile_speed": 7, "sprite": "src/sprites/weapons/magic_wand.png", "sound": "src/sprites/sounds/fire_ball_sound.wav", "sound_volume": 0.1, "projectile": "src/sprites/weapons/magic_bullet.png",
                    "damage/upgrade": 1, "attack_speed/upgrade": 0.3, "range/upgrade": 15}, 
 }
 
 class Weapon:
-    def __init__(self, weapon_type):
+    def __init__(self, weapon_type, level=1):
         self.weapon_name = weapon_type
         self.weapon_type = WEAPONS[weapon_type]
+        self.level = level
         self.attack_speed = self.weapon_type["attack_speed"]
         self.range = self.weapon_type["range"]
-        self.image = pygame.transform.scale(pygame.image.load(self.weapon_type["sprite"]), (70, 70))
-        self.sound = pygame.mixer.Sound(self.weapon_type.get("sound", ""))
+        self.image = get_sprite(self.weapon_type["sprite"], (70, 70))
+        self.sound = get_sound(self.weapon_type.get("sound", ""), self.weapon_type["sound_volume"])
         self.sound.set_volume(self.weapon_type["sound_volume"])
         self.last_attack_time = pygame.time.get_ticks()
         
     def play_sound(self):
         if self.sound:
             self.sound.play()
+            
+    def apply_upgrades(self):
+        if self.level < 4:
+            self.level += 1
+        for key, value in self.weapon_type.items():
+            if key.endswith("/upgrade"):
+                stat = key.replace("/upgrade", "")
+                if hasattr(self, stat):
+                    setattr(self, stat, getattr(self, stat) + value)
             
 class Melee_Weapon(Weapon):
     def __init__(self, weapon_type):

@@ -1,12 +1,16 @@
 import pygame
 
+from math import ceil
+
 ITEMS = {
     "hp_potion": {"base_price": 2, "max_hp_gain_value": 8, "image_path": "src/sprites/items/hp_potion.png"},
     "heart_of_renewal": {"base_price": 2, "hp_regen_gain_value": 1, "image_path": "src/sprites/items/heart_of_renewal.png"},
-    "magic_amulet": {"base_price": 5, "magic_damage_gain_value": 5, "image_path": "src/sprites/items/magic_amulet.png"},
-    "magic_spell": {"base_price": 1, "magic_damage_gain_value": 1, "image_path": "src/sprites/items/magic_spell.png"},
+    "magic_amulet": {"base_price": 5, "magic_dmg_gain_value": 5, "image_path": "src/sprites/items/magic_amulet.png"},
+    "magic_spell": {"base_price": 1, "magic_dmg_gain_value": 1, "image_path": "src/sprites/items/magic_spell.png"},
     "vest": {"base_price": 5, "max_armor_gain_value": 3, "image_path": "src/sprites/items/vest.png"},
-    "glove_of_fury": {"base_price": 1, "attack_speed_gain_value": 1.2, "image_path": "src/sprites/items/glove_of_fury.png"},
+    "glove_of_fury": {"base_price": 1, "attack_speed_gain_value": 1.2, "image_path": "src/sprites/items/glove_of_fury.png"}, # zmienic
+    "fast_boots": {"base_price": 7, "speed_gain_value": 0.4, "image_path": "src/sprites/items/glove_of_fury.png"},
+    
 }
 
 class Item:

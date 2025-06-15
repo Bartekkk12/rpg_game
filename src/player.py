@@ -13,8 +13,8 @@ class Player(entity.Entity):
         self.melee_dmg = 1
         self.ranged_dmg = 1
         self.magic_dmg = 1
-        self.range = 50 # dodac do skalowani z bronia
-        self.max_armor = 1 # zmienic na procentowy system
+        self.range = 50
+        self.max_armor = 1
         self.current_armor = self.max_armor
         self.speed = 3
         self.level = 1
@@ -22,12 +22,12 @@ class Player(entity.Entity):
         self.exp = 0
         self.exp_needed = 30
         self.gold = 0
-        
-        # weapons
-        self.weapons = []
+
+        # weapons: dict {weapon_key: WeaponObiekt}
+        self.weapons = {}
         self.MAX_WEAPONS = 4
         self.current_weapons = 0
-        
+
         # time
         self.last_time_attack = pygame.time.get_ticks()
         self.last_time_hp_regen = pygame.time.get_ticks()
@@ -160,26 +160,27 @@ class Player(entity.Entity):
 
         offsets = []
         sides = []
-        if len(self.weapons) == 1:
+        weapon_objs = list(self.weapons.values())
+        if len(weapon_objs) == 1:
             offsets = [(0, -weapon_size//2 - spacing)]
             sides = ["center"]
-        elif len(self.weapons) == 2:
+        elif len(weapon_objs) == 2:
             offsets = [(-weapon_size//2 - spacing, -weapon_size//3),
-                    (weapon_size//2 + spacing, -weapon_size//3)]
+                       (weapon_size//2 + spacing, -weapon_size//3)]
             sides = ["left", "right"]
-        elif len(self.weapons) == 3:
+        elif len(weapon_objs) == 3:
             offsets = [(-weapon_size//2 - spacing, 0),
-                    (weapon_size//2 + spacing, 0),
-                    (0, -weapon_size//2 - spacing)]
+                       (weapon_size//2 + spacing, 0),
+                       (0, -weapon_size//2 - spacing)]
             sides = ["left", "right", "left"]
-        elif len(self.weapons) == 4:
+        elif len(weapon_objs) == 4:
             offsets = [(-weapon_size//2 - spacing, -weapon_size//3),
-                    (weapon_size//2 + spacing, -weapon_size//3),
-                    (-weapon_size//2 - spacing, weapon_size//3),
-                    (weapon_size//2 + spacing, weapon_size//3)]
+                       (weapon_size//2 + spacing, -weapon_size//3),
+                       (-weapon_size//2 - spacing, weapon_size//3),
+                       (weapon_size//2 + spacing, weapon_size//3)]
             sides = ["left", "right", "left", "right"]
 
-        for weapon, (ox, oy), side in zip(self.weapons, offsets, sides):
+        for weapon, (ox, oy), side in zip(weapon_objs, offsets, sides):
             wx = cx + ox - weapon_size//2
             wy = cy + oy - weapon_size//2
             angle = 0

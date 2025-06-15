@@ -2,6 +2,8 @@ import pygame
 
 from settings import *
 from item import ITEMS
+from math import ceil
+from weapon import WEAPONS
 
 class Screen:
     def __init__(self):
@@ -217,7 +219,7 @@ class Screen:
         pending_levels = font.render(f"Pending upgrades: {player.pending_level_ups}", True, (255, 255, 255))
         self.surface.blit(pending_levels, (800, 200))
         
-    def display_shop_screen(self, shop_selection, items):
+    def display_shop_screen(self, shop_selection, items, player, current_round):
         self.surface.fill((30, 30, 30))
         font = pygame.font.Font(None, 36)
         title = font.render("Shop - Choose an item", True, (255, 255, 255))
@@ -231,6 +233,8 @@ class Screen:
         start_x = (self._width - total_items_width) // 2
         y = self._height // 2 - item_height // 2
         
+        self.display_player_gold(player)
+        
         for i, item_key in enumerate(items):
             rect_x = start_x + i * (item_width + spacing)
             rect = pygame.Rect(rect_x, y, item_width, item_height)
@@ -242,27 +246,62 @@ class Screen:
 
             if item_key is None:
                 bought_text = item_font.render("KUPIONO", True, (128, 128, 128))
-                self.surface.blit(bought_text, (rect_x + item_width // 2 - bought_text.get_width() // 2, y + item_height // 2 - bought_text.get_height() // 2))
+                self.surface.blit(
+                    bought_text,
+                    (rect_x + item_width // 2 - bought_text.get_width() // 2,
+                    y + item_height // 2 - bought_text.get_height() // 2)
+                )
                 continue
 
-            item = ITEMS[item_key]
-
-            if item["image_path"]:
-                img = pygame.transform.scale(pygame.image.load(item["image_path"]), (100, 100))
+            if i == 0:
+                weapon_key = item_key
+                weapon_data = WEAPONS[weapon_key]
+                weapon = player.weapons.get(weapon_key)
+                img = pygame.transform.scale(pygame.image.load(weapon_data["sprite"]), (100, 100))
                 img_x = rect_x + (item_width - 100) // 2
                 img_y = y + 10
                 self.surface.blit(img, (img_x, img_y))
-            
-            name_text = item_font.render(item_key.replace('_', ' ').title(), True, (0, 0, 0))
-            self.surface.blit(name_text, (rect_x + 10, y + 120))
+                name_text = item_font.render(weapon_key.replace('_', ' ').title(), True, (0, 0, 0))
+                self.surface.blit(name_text, (rect_x + 10, y + 120))
+                if weapon is None:
+                    price = weapon_data["base_price"]
+                    price_text = item_font.render(f"Buy for {price} gold", True, (255, 215, 0))
+                    self.surface.blit(price_text, (rect_x + 10, y + 150))
+                    effect = f"+{weapon_data['damage']} dmg, {weapon_data['attack_speed']} atk spd"
+                    effect_text = item_font.render(effect, True, (50, 255, 100))
+                    self.surface.blit(effect_text, (rect_x + 10, y + 175))
+                elif weapon.level < 4:
+                    upgrade_price = ceil(weapon_data["base_price"] * (1.3 ** weapon.level))
+                    price_text = item_font.render(f"Upgrade (lvl {weapon.level}) for {upgrade_price} gold", True, (50, 255, 100))
+                    self.surface.blit(price_text, (rect_x + 10, y + 150))
+                    upg_dmg = weapon_data.get("damage/upgrade", 0)
+                    upg_spd = weapon_data.get("attack_speed/upgrade", 0)
+                    effect = f"+{upg_dmg} dmg, +{upg_spd} atk spd"
+                    effect_text = item_font.render(effect, True, (50, 255, 100))
+                    self.surface.blit(effect_text, (rect_x + 10, y + 175))
+                else:
+                    max_text = item_font.render("Max level!", True, (200, 0, 0))
+                    self.surface.blit(max_text, (rect_x + 10, y + 150))
+            else:
+                # Item
+                item = ITEMS[item_key]
+                if item["image_path"]:
+                    img = pygame.transform.scale(pygame.image.load(item["image_path"]), (100, 100))
+                    img_x = rect_x + (item_width - 100) // 2
+                    img_y = y + 10
+                    self.surface.blit(img, (img_x, img_y))
+                
+                name_text = item_font.render(item_key.replace('_', ' ').title(), True, (0, 0, 0))
+                self.surface.blit(name_text, (rect_x + 10, y + 120))
 
-            price_text = item_font.render(f"{item['base_price']} gold", True, (255, 215, 0))
-            self.surface.blit(price_text, (rect_x + 10, y + 150))
+                price = ceil(item["base_price"] * (current_round * 1.15))
+                price_text = item_font.render(f"{price} gold", True, (255, 215, 0))
+                self.surface.blit(price_text, (rect_x + 10, y + 150))
 
-            effect = next((f"+{v} {k.replace('_gain_value','').replace('_',' ')}"
-                        for k, v in item.items() if k.endswith("_gain_value")), "")
-            effect_text = item_font.render(effect, True, (50, 255, 100))
-            self.surface.blit(effect_text, (rect_x + 10, y + 175))
+                effect = next((f"+{v} {k.replace('_gain_value','').replace('_',' ')}"
+                            for k, v in item.items() if k.endswith("_gain_value")), "")
+                effect_text = item_font.render(effect, True, (50, 255, 100))
+                self.surface.blit(effect_text, (rect_x + 10, y + 175))
         
         # Next round button
         next_round_color = (255, 255, 0) if shop_selection == 4 else (255, 255, 255)

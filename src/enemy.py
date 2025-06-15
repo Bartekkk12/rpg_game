@@ -44,7 +44,6 @@ class Enemy(entity.Entity):
         self.range = self.enemy_type["range"]
         self.last_time_attack = pygame.time.get_ticks()
         self.direction = ""
-
         self.rect = pygame.Rect(self.x, self.y, self.width, self.height)
 
         

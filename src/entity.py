@@ -1,12 +1,14 @@
 import pygame
 
+from assets import *
+
 class Entity:
     def __init__(self, x, y, width, height, image_path=None):
         self.x = x
         self.y = y
         self.width = width
         self.height = height
-        self.image = pygame.transform.scale(pygame.image.load(image_path), (width, height)) if image_path else None
+        self.image = get_sprite(image_path, (width, height))
         self.fliped_image = pygame.transform.flip(self.image, True, False)
         
     def get_rect(self):
