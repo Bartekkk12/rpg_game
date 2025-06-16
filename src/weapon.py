@@ -25,11 +25,11 @@ WEAPONS = {
 }
 
 class Weapon:
+    '''Base class for all weapons.'''
     def __init__(self, weapon_type, level=1):
         self.weapon_name = weapon_type
         self.weapon_type = WEAPONS[weapon_type]
         self.level = level
-        
         self.attack_speed = self.weapon_type["attack_speed"]
         self.range = self.weapon_type["range"]
        
@@ -39,10 +39,12 @@ class Weapon:
         self.last_attack_time = pygame.time.get_ticks()
         
     def play_sound(self):
+        '''Play the weapon's attack sound effect.'''
         if self.sound:
             self.sound.play()
             
     def apply_upgrades(self):
+        '''Apply weapon upgrades, increasing stats if not maxed.'''
         if self.level < 4:
             self.level += 1
             for key, value in self.weapon_type.items():
@@ -52,10 +54,12 @@ class Weapon:
                     setattr(self, stat, self.weapon_type[stat])
             
 class Melee_Weapon(Weapon):
+    '''Class representing a melee weapon (e.g., sword, scythe).'''
     def __init__(self, weapon_type):
         super().__init__(weapon_type)
         
     def attack(self, player, enemies, side=None):
+        '''Perform a melee attack on the nearest enemy within range.'''
         current_time = pygame.time.get_ticks()
         cooldown = int(1000 / self.attack_speed)
         
@@ -103,6 +107,7 @@ class Ranged_Weapon(Weapon):
         self.projectile_image = self.weapon_type["projectile"]
 
     def attack(self, player, enemies, side=None):
+        '''Class representing a ranged weapon (e.g., pistol, bow).'''
         current_time = pygame.time.get_ticks()
         cooldown = int(1000 / self.attack_speed)
         
@@ -151,12 +156,14 @@ class Ranged_Weapon(Weapon):
         return None
 
 class Magic_Weapon(Weapon):
+    '''Class representing a magic weapon (e.g., pyromancy flame, magic wand).'''
     def __init__(self, weapon_type):
         super().__init__(weapon_type)
         self.projectile_speed = self.weapon_type["projectile_speed"]
         self.projectile_image = self.weapon_type["projectile"]
 
     def attack(self, player, enemies, side=None):
+        '''Fire a homing magic projectile at the nearest enemy.'''
         current_time = pygame.time.get_ticks()
         cooldown = int(1000 / self.attack_speed)
         if current_time - self.last_attack_time < cooldown or not enemies:

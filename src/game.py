@@ -12,6 +12,7 @@ from shop import *
 from item import *
 
 class Game:
+    '''Class representing game logic and state manager.'''
     def __init__(self):
         pygame.init()
         pygame.mixer.init()
@@ -27,7 +28,7 @@ class Game:
         self.round_in_progress = False
         self.round_time = 30  # seconds
         self.round_timer = 0
-        self.enemy_spawn_interval = 0.8
+        self.enemy_spawn_interval = 1
         self.enemy_spawn_timer = 0
         self.upgrade_options = []
         self.upgrade_selected = 0
@@ -56,11 +57,13 @@ class Game:
         self.last_item_selection = 0
 
     def game(self):
+        '''Handles game logic during a round.'''
         dt = 1/60
         
         self.screen.fill_game_background()
         keys = pygame.key.get_pressed()
         
+        # round logic
         if self.round_in_progress:
             self.round_timer += dt
             self.enemy_spawn_timer += dt
@@ -83,6 +86,7 @@ class Game:
                     self.state = "shop"
                 return
                     
+        # loot colection
         for loot in self.dead_enemies_loot[:]:
             if loot.get_rect().colliderect(self.player.get_rect()):
                 self.player.gold += loot.amount
@@ -93,12 +97,11 @@ class Game:
                     self.player.level_up()
             else:
                 loot.draw(self.screen)
-                loot.draw_hit_box(self.screen, (0, 0, 255)) # debugging
 
+        # enemies logic
         for enemy in self.enemies[:]:
             enemy.follow_player(self.player)
             enemy.draw(self.screen)
-            enemy.draw_hit_box(self.screen, (255, 0, 0))  # debugging
 
             if enemy.current_hp <= 0:
                 self.enemies.remove(enemy)
@@ -107,7 +110,7 @@ class Game:
                 )
             enemy.attack(self.player)       
 
-        # place weapons
+        # weapons and attacks
         weapon_list = list(self.player.weapons.values())
         weapon_count = len(weapon_list)
         weapon_sides = []
@@ -122,7 +125,7 @@ class Game:
         else:
             weapon_sides = ["left"] * weapon_count
 
-        # projectiles
+        # projectiles logic
         for weapon, side in zip(weapon_list, weapon_sides):
             projectile = weapon.attack(self.player, self.enemies, side)
             if projectile:
@@ -149,7 +152,6 @@ class Game:
         self.player.draw(self.screen)
         self.player.draw_weapons(self.screen, self.enemies)
         self.player.regen_hp()  
-        self.player.draw_hit_box(self.screen, (0, 255, 0))  # debugging
 
         if self.player.current_hp <= 0:
             self.state = "game_over"
@@ -158,168 +160,44 @@ class Game:
         self.screen.display_UI(self.player, self.enemies, self.round, time_left)
 
     def run(self):
+        '''Main loop of the game.'''
         while self.running:
+            # handle events
             for event in pygame.event.get():
                 if event.type == pygame.QUIT:
                     self.running = False
                 elif event.type == pygame.KEYDOWN:
                     if self.state == "menu":
-                        if event.key in (pygame.K_w, pygame.K_UP):
-                            self.selected_option = 1
-                        elif event.key in (pygame.K_s, pygame.K_DOWN):
-                            self.selected_option = 2
-                        elif event.key in (pygame.K_RETURN, pygame.K_KP_ENTER, pygame.K_SPACE):
-                            if self.selected_option == 1:
-                                pygame.mixer.music.stop()
-                                self.player.reset_stats()
-                                self.round = 1
-                                self.start_round()
-                                self.state = "game"
-                            elif self.selected_option == 2:
-                                self.running = False
+                        self.handle_menu(event)
                     elif self.state == "level_up":
-                        if self.upgrade_options:
-                            if event.key in (pygame.K_w, pygame.K_UP):
-                                self.upgrade_selected = (self.upgrade_selected - 1) % len(self.upgrade_options)
-                            elif event.key in (pygame.K_s, pygame.K_DOWN):
-                                self.upgrade_selected = (self.upgrade_selected + 1) % len(self.upgrade_options)
-                            elif event.key in (pygame.K_RETURN, pygame.K_KP_ENTER):
-                                if self.player.pending_level_ups > 1:
-                                    self.player.pending_level_ups -= 1
-                                else:
-                                    self.player.apply_upgrades(self.upgrade_preview_stats)
-                                    self.player.pending_level_ups = 0
-                                    self.start_round()
-                                    self.shop.roll_items(self.player)
-                                    self.shop_selection = 0
-                                    self.state = "shop"
-                            elif event.key == pygame.K_d and self.player.pending_level_ups > 0:
-                                selected = self.upgrade_options[self.upgrade_selected]
-                                self.apply_preview_upgrade(selected["id"], 1)
-                                self.player.pending_level_ups -= 1
-                            elif event.key == pygame.K_a:
-                                if self.player.pending_level_ups < self.max_pending_level_ups:
-                                    selected = self.upgrade_options[self.upgrade_selected]
-                                    self.apply_preview_upgrade(selected["id"], -1)
-                                    self.player.pending_level_ups += 1
+                        self.handle_level_up(event)
                     elif self.state == "game_over":
-                        if event.key == pygame.K_d:
-                            self.selected_option = 2
-                        elif event.key == pygame.K_a:
-                            self.selected_option = 1
-                        elif event.key in (pygame.K_RETURN, pygame.K_KP_ENTER, pygame.K_SPACE):
-                            if self.selected_option == 1:
-                                self.player.reset_stats()
-                                self.player.weapons.clear()
-                                self.round = 1
-                                self.start_round()
-                                self.state = "game"
-                            elif self.selected_option == 2:
-                                self.state = "menu"
+                        self.handle_game_over(event)
                     elif self.state == "victory":
-                        if event.key == pygame.K_d:
-                            self.selected_option = 2
-                        elif event.key == pygame.K_a:
-                            self.selected_option = 1
-                        elif event.key in (pygame.K_RETURN, pygame.K_KP_ENTER, pygame.K_SPACE):
-                            if self.selected_option == 1:
-                                self.player.reset_stats()
-                                self.round = 1
-                                self.start_round()
-                                self.state = "game"
-                            elif self.selected_option == 2:
-                                self.state = "menu"
+                        self.handle_victory(event)
                     elif self.state == "shop":
-                        if event.key in (pygame.K_a, pygame.K_LEFT):
-                            if self.shop_selection in range(1, 4):
-                                self.shop_selection -= 1
-                        elif event.key in (pygame.K_d, pygame.K_RIGHT):
-                            if self.shop_selection in range(0, 3):
-                                self.shop_selection += 1
-                        elif event.key in (pygame.K_s, pygame.K_DOWN):
-                            if self.shop_selection in range(0, 4):
-                                self.last_item_selection = self.shop_selection
-                                self.shop_selection = 4
-                        elif event.key in (pygame.K_w, pygame.K_UP):
-                            if self.shop_selection == 4:
-                                self.shop_selection = self.last_item_selection
-                        elif event.key in (pygame.K_RETURN, pygame.K_KP_ENTER, pygame.K_SPACE):
-                            if self.shop_selection in range(0, 4):
-                                item_key = self.shop.current_items[self.shop_selection]
-                                if item_key is None:
-                                    print("Przedmiot już kupiony!" if self.shop_selection != 0 else "Brak broni do kupienia na tej pozycji.")
-                                    continue
-
-                                if item_key in WEAPONS:
-                                    # BROŃ (kup lub ulepsz)
-                                    weapon_key = item_key
-                                    weapon_data = WEAPONS[weapon_key]
-                                    weapon = self.player.weapons.get(weapon_key)
-                                    if weapon is None:
-                                        price = weapon_data["base_price"]
-                                        if self.player.gold >= price:
-                                            self.player.gold -= price
-                                            # Tworzenie odpowiedniego typu broni:
-                                            if weapon_key in ["pistol", "bow"]:
-                                                weapon_obj = Ranged_Weapon(weapon_key)
-                                            elif weapon_key in ["magic_wand", "pyromancy_flame"]:
-                                                weapon_obj = Magic_Weapon(weapon_key)
-                                            elif weapon_key in ["sword", "scythe"]:
-                                                weapon_obj = Melee_Weapon(weapon_key)
-                                            self.player.weapons[weapon_key] = weapon_obj
-                                            self.shop.current_items[self.shop_selection] = None
-                                            print(f"Kupiono nową broń: {weapon_key}")
-                                        else:
-                                            print("Za mało złota, by kupić broń.")
-                                    elif weapon.level < 4:
-                                        upgrade_price = math.ceil(weapon_data["base_price"] * (1.3 ** weapon.level))
-                                        if self.player.gold >= upgrade_price:
-                                            self.player.gold -= upgrade_price
-                                            weapon.apply_upgrades()
-                                            self.shop.current_items[self.shop_selection] = None
-                                            print(f"Ulepszono {weapon_key} do poziomu {weapon.level}")
-                                        else:
-                                            print("Za mało złota, by ulepszyć broń.")
-                                    else:
-                                        print("Broń ma już maksymalny poziom!")
-                                elif item_key in ITEMS:
-                                    # ITEM (dowolny slot)
-                                    item_info = ITEMS[item_key]
-                                    price = math.ceil(item_info["base_price"] * (self.round * 1.15))
-                                    if self.player.gold >= price:
-                                        self.player.gold -= price
-                                        item = Item(item_key)
-                                        item.apply_upgrades(self.player)
-                                        self.shop.current_items[self.shop_selection] = None
-                                        print(f"Kupiono przedmiot {item_key}")
-                                    else:
-                                        print("Za mało złota")
-                                else:
-                                    print("Nieznany przedmiot/klucz w sklepie!")
-                            elif self.shop_selection == 4:
-                                self.shop.roll_items(self.player)
-                                self.start_round()
-                                self.state = "game"
+                        self.handle_shop(event)
                         
             # game states
             if self.state == "menu":
                 if not pygame.mixer.music.get_busy() or self.current_ost != "menu":
                     pygame.mixer.music.load(self.menu_ost)
                     pygame.mixer.music.play(-1)
-                    pygame.mixer.music.set_volume(0) # debugging
+                    pygame.mixer.music.set_volume(0.1)
                     self.current_ost = "menu"
                 self.screen.menu(self.selected_option)
             elif self.state == "game":
                 if not pygame.mixer.music.get_busy() or self.current_ost != "game":
                     pygame.mixer.music.load(self.game_ost)
                     pygame.mixer.music.play(-1)
-                    pygame.mixer.music.set_volume(0) # debugging
+                    pygame.mixer.music.set_volume(0.02)
                     self.current_ost = "game"
                 self.game()
             elif self.state == "level_up":
                 pygame.mixer.music.stop()
                 self.screen.display_level_up_screen(self.upgrade_options, self.upgrade_selected, self.upgrade_preview_stats, self.player)
             elif self.state == "shop":
+                pygame.mixer.music.stop()
                 self.screen.display_shop_screen(self.shop_selection, self.shop.current_items, self.player, self.round)
             elif self.state == "game_over":
                 pygame.mixer.music.stop()
@@ -333,6 +211,7 @@ class Game:
         pygame.quit()
 
     def start_round(self):
+        '''Starts a new round and resets relevant state.'''
         self.set_enemy_spawn_interval()
         if "pistol" not in self.player.weapons:
             self.player.weapons["pistol"] = Ranged_Weapon("pistol")
@@ -346,6 +225,7 @@ class Game:
         self.enemy_spawn_timer = 0
 
     def spawn_enemies(self, count):
+        '''Spawns enemies at a safe distance from player.'''
         spawned = 0
         tries_limit = 100
         max_enemies_on_screen = min(self.MAX_ENEMIES_ON_SCREEN, self.max_enemies + self.round * 2)
@@ -366,13 +246,13 @@ class Game:
                 spawned += 1
 
     def generate_upgrade_options(self):
+        '''Prepares upgrade options after level up.'''
         self.max_pending_level_ups = self.player.pending_level_ups
         self.upgrade_options = [
             {"id": "HP"},
             {"id": "Melee Damage"},
             {"id": "Ranged Damage"},
             {"id": "Magic Damage"},
-            {"id": "Range"},
             {"id": "Armor"},
             {"id": "Speed"},
         ]
@@ -382,18 +262,17 @@ class Game:
             "Melee Damage": self.player.melee_dmg,
             "Ranged Damage": self.player.ranged_dmg,
             "Magic Damage": self.player.magic_dmg,
-            "Range": self.player.range,
             "Armor": self.player.max_armor,
             "Speed": self.player.speed
         }
 
     def apply_preview_upgrade(self, upgrade_id, direction):
+        '''Applies changes to previewed upgrade stats.'''
         base_stats = {
             "HP": self.player.max_hp,
             "Melee Damage": self.player.melee_dmg,
             "Ranged Damage": self.player.ranged_dmg,
             "Magic Damage": self.player.magic_dmg,
-            "Range": self.player.range,
             "Armor": self.player.max_armor,
             "Speed": self.player.speed
         }
@@ -409,19 +288,162 @@ class Game:
             self.upgrade_preview_stats["Ranged Damage"] += direction
         elif upgrade_id == "Magic Damage":
             self.upgrade_preview_stats["Magic Damage"] += direction
-        elif upgrade_id == "Range":
-            self.upgrade_preview_stats["Range"] += direction
         elif upgrade_id == "Armor":
             self.upgrade_preview_stats["Armor"] += direction
         elif upgrade_id == "Speed":
-            self.upgrade_preview_stats["Speed"] += 0.4 * direction
+            self.upgrade_preview_stats["Speed"] += 0.1 * direction
             
     def set_enemy_spawn_interval(self):
+        '''Sets enemy spawn interval depending on round.'''
         if self.round < 5:
-            self.enemy_spawn_interval = 0.8 
+            self.enemy_spawn_interval = 1.5
         elif 5 <= self.round < 10:
-            self.enemy_spawn_interval = 0.6
+            self.enemy_spawn_interval = 1
         elif 10 <= self.round < 15:
-            self.enemy_spawn_interval = 0.4
+            self.enemy_spawn_interval = 0.7
         else:
-            self.enemy_spawn_interval = 0.3
+            self.enemy_spawn_interval = 0.5
+            
+    def handle_menu(self, event):
+        '''Handles main menu navigation and actions.'''
+        if event.key in (pygame.K_w, pygame.K_UP):
+            self.selected_option = 1
+        elif event.key in (pygame.K_s, pygame.K_DOWN):
+            self.selected_option = 2
+        elif event.key in (pygame.K_RETURN, pygame.K_KP_ENTER, pygame.K_SPACE):
+            if self.selected_option == 1:
+                pygame.mixer.music.stop()
+                self.player.reset_stats()
+                self.round = 1
+                self.start_round()
+                self.state = "game"
+            elif self.selected_option == 2:
+                self.running = False
+                
+    def handle_level_up(self, event):
+        '''Handles level up upgrade selection.'''
+        if self.upgrade_options:
+            if event.key in (pygame.K_w, pygame.K_UP):
+                self.upgrade_selected = (self.upgrade_selected - 1) % len(self.upgrade_options)
+            elif event.key in (pygame.K_s, pygame.K_DOWN):
+                self.upgrade_selected = (self.upgrade_selected + 1) % len(self.upgrade_options)
+            elif event.key in (pygame.K_RETURN, pygame.K_KP_ENTER):
+                if self.player.pending_level_ups > 1:
+                    self.player.pending_level_ups -= 1
+                else:
+                    self.player.apply_upgrades(self.upgrade_preview_stats)
+                    self.player.pending_level_ups = 0
+                    self.start_round()
+                    self.shop.roll_items(self.player)
+                    self.shop_selection = 0
+                    self.state = "shop"
+            elif event.key == pygame.K_d and self.player.pending_level_ups > 0:
+                selected = self.upgrade_options[self.upgrade_selected]
+                self.apply_preview_upgrade(selected["id"], 1)
+                self.player.pending_level_ups -= 1
+            elif event.key == pygame.K_a:
+                if self.player.pending_level_ups < self.max_pending_level_ups:
+                    selected = self.upgrade_options[self.upgrade_selected]
+                    self.apply_preview_upgrade(selected["id"], -1)
+                    self.player.pending_level_ups += 1
+                    
+    def handle_game_over(self, event):
+        '''Handles game over screen actions.'''
+        if event.key == pygame.K_d:
+            self.selected_option = 2
+        elif event.key == pygame.K_a:
+            self.selected_option = 1
+        elif event.key in (pygame.K_RETURN, pygame.K_KP_ENTER, pygame.K_SPACE):
+            if self.selected_option == 1:
+                self.player.reset_stats()
+                self.player.weapons.clear()
+                self.round = 1
+                self.start_round()
+                self.state = "game"
+            elif self.selected_option == 2:
+                self.state = "menu"
+    
+    def handle_victory(self, event):
+        '''Handles victory screen actions.'''
+        if event.key == pygame.K_d:
+            self.selected_option = 2
+        elif event.key == pygame.K_a:
+            self.selected_option = 1
+        elif event.key in (pygame.K_RETURN, pygame.K_KP_ENTER, pygame.K_SPACE):
+            if self.selected_option == 1:
+                self.player.reset_stats()
+                self.round = 1
+                self.start_round()
+                self.state = "game"
+            elif self.selected_option == 2:
+                self.state = "menu"
+                
+    def handle_shop(self, event):
+        '''Handles shop navigation and purchases.'''
+        if event.key in (pygame.K_a, pygame.K_LEFT):
+            if self.shop_selection in range(1, 4):
+                self.shop_selection -= 1
+        elif event.key in (pygame.K_d, pygame.K_RIGHT):
+            if self.shop_selection in range(0, 3):
+                self.shop_selection += 1
+        elif event.key in (pygame.K_s, pygame.K_DOWN):
+            if self.shop_selection in range(0, 4):
+                self.last_item_selection = self.shop_selection
+                self.shop_selection = 4
+        elif event.key in (pygame.K_w, pygame.K_UP):
+            if self.shop_selection == 4:
+                self.shop_selection = self.last_item_selection
+        elif event.key in (pygame.K_RETURN, pygame.K_KP_ENTER, pygame.K_SPACE):
+            if self.shop_selection in range(0, 4):
+                item_key = self.shop.current_items[self.shop_selection]
+                if item_key is None:
+                    print("Item already bought" if self.shop_selection != 0 else "No weapon to buy.")
+                else:
+                    if item_key in WEAPONS:
+                        # Weapon
+                        weapon_key = item_key
+                        weapon_data = WEAPONS[weapon_key]
+                        weapon = self.player.weapons.get(weapon_key)
+                        if weapon is None:
+                            price = weapon_data["base_price"]
+                            if self.player.gold >= price:
+                                self.player.gold -= price
+                                # Tworzenie odpowiedniego typu broni:
+                                if weapon_key in ["pistol", "bow"]:
+                                    weapon_obj = Ranged_Weapon(weapon_key)
+                                elif weapon_key in ["magic_wand", "pyromancy_flame"]:
+                                    weapon_obj = Magic_Weapon(weapon_key)
+                                elif weapon_key in ["sword", "scythe"]:
+                                    weapon_obj = Melee_Weapon(weapon_key)
+                                self.player.weapons[weapon_key] = weapon_obj
+                                self.shop.current_items[self.shop_selection] = None
+                                print(f"Bought weapon: {weapon_key}")
+                            else:
+                                print("Not enough gold to buy weapon.")
+                        elif weapon.level < 4:
+                            upgrade_price = math.ceil(weapon_data["base_price"] * (1.6** weapon.level))
+                            if self.player.gold >= upgrade_price:
+                                self.player.gold -= upgrade_price
+                                weapon.apply_upgrades()
+                                self.shop.current_items[self.shop_selection] = None
+                                print(f"Upgraded {weapon_key} to {weapon.level} level")
+                            else:
+                                print("Not enough gold to upgrade weapon.")
+                        else:
+                            print("Weapon at max level")
+                    elif item_key in ITEMS:
+                        # Item
+                        item_info = ITEMS[item_key]
+                        price = math.ceil(item_info["base_price"] * (self.round * 1.15))
+                        if self.player.gold >= price:
+                            self.player.gold -= price
+                            item = Item(item_key)
+                            item.apply_upgrades(self.player)
+                            self.shop.current_items[self.shop_selection] = None
+                            print(f"Bought item {item_key}")
+                        else:
+                            print("Not enough gold")
+            elif self.shop_selection == 4:
+                self.shop.roll_items(self.player)
+                self.start_round()
+                self.state = "game"

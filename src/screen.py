@@ -7,31 +7,37 @@ from weapon import WEAPONS
 from assets import get_sprite
 
 class Screen:
+    '''Screen class creating a window.'''
     def __init__(self):
         self._width = WIDTH
         self._height = HEIGHT
         self.surface = pygame.display.set_mode((self._width, self._height))
         self.clock = pygame.time.Clock()
 
-        self.menu_background = pygame.transform.scale(pygame.image.load("src/sprites/backgrounds/menu_background.png"), (self._width, self._height))
-        self.game_background = pygame.transform.scale(pygame.image.load("src/sprites/backgrounds/game_background.png"), (self._width, self._height))
-        self.game_over_background = pygame.transform.scale(pygame.image.load("src/sprites/backgrounds/game_over_background.png"), (self._width, self._height))
+        # Load backgrounds and icon
+        self.menu_background = get_sprite("src/sprites/backgrounds/menu_background.png", (self._width, self._height))
+        self.game_background = get_sprite("src/sprites/backgrounds/game_background.png", (self._width, self._height))
+        self.game_over_background = get_sprite("src/sprites/backgrounds/game_over_background.png", (self._width, self._height))
         self.icon = pygame.image.load("src/sprites/player.png")
 
         pygame.display.set_caption(TITLE)
         pygame.display.set_icon(self.icon)
 
     def update(self):
+        '''Update the display and tick the clock.'''
         pygame.display.flip()
         self.clock.tick(FPS)
     
     def fill_menu_background(self):
+        '''Draw menu background.'''
         self.surface.blit(self.menu_background, (0, 0))
 
     def fill_game_background(self):
+        '''Draw game background.'''
         self.surface.blit(self.game_background, (0, 0))
         
     def display_UI(self, player, enemies, current_round, time_left=None):
+        '''Display the in-game UI: round, enemies, HP, level, armor, gold.'''
         self.display_current_round(current_round, time_left)
         self.display_current_enemies_count(enemies)
         self.display_player_current_hp(player)
@@ -40,7 +46,7 @@ class Screen:
         self.display_player_gold(player)
         
     def menu(self, selected_option):
-        # settings
+        '''Display main menu.'''
         self.fill_menu_background()
         title_font = pygame.font.Font(None, 72)
         options_font = pygame.font.Font(None, 42)
@@ -62,6 +68,7 @@ class Screen:
             self.surface.blit(option_surface, option_rect)
 
     def display_player_current_hp(self, player):
+        '''Display HP bar.'''
         bar_width = 200
         bar_height = 25
         bar_x = 10
@@ -79,6 +86,7 @@ class Screen:
         self.surface.blit(text, (100, 15))
 
     def display_player_current_level(self, player):
+        '''Display Level/XP bar.'''
         bar_width = 200
         bar_height = 25
         bar_x = 10
@@ -96,6 +104,7 @@ class Screen:
         self.surface.blit(text, (100, 48))
         
     def display_player_current_armor(self, player):
+        '''Display armor bar.'''
         bar_width = 200
         bar_height = 25
         bar_x = 10
@@ -113,13 +122,15 @@ class Screen:
         self.surface.blit(text, (80, 83))
 
     def display_player_gold(self, player):
-        gold_exp = pygame.transform.scale(pygame.image.load("src/sprites/gold_exp.png"), (50, 50))
+        '''Display gold amount.'''
+        gold_exp = get_sprite("src/sprites/gold_exp.png", (50, 50))
         font = pygame.font.Font(None, 36)
         text = font.render(f"{player.gold}", True, (255, 255, 255))
         self.surface.blit(gold_exp, (5, 110))
         self.surface.blit(text, (55, 128))
 
     def display_current_round(self, round, time_left=None):
+        '''Display current round and timer.'''
         font = pygame.font.Font(None, 36)
         round_text = font.render(f"Round: {round}", True, (255, 255, 255))
         text_width = round_text.get_width()
@@ -131,74 +142,89 @@ class Screen:
             self.surface.blit(timer_text, (x_pos, 45))
 
     def display_current_enemies_count(self, enemies):
+        '''Display number of enemies left.'''
         font = pygame.font.Font(None, 36)
         round_text = font.render(f"Enemies: {len(enemies)}", True, (255, 255, 255))
         self.surface.blit(round_text, (10, HEIGHT - 40))
         
     def display_game_over_screen(self, wave, selected_option, player):
+        '''Display Game Over screen with stats and options.'''
         self.surface.blit(self.game_over_background, (0, 0))
+
+        # display game over text
+        title_font = pygame.font.Font(None, 80)
+        shadow = title_font.render("Game Over", True, (0, 0, 0))
+        shadow_rect = shadow.get_rect(center=(self._width // 2, 80))
+        self.surface.blit(shadow, (shadow_rect.x + 4, shadow_rect.y + 4))
+        title = title_font.render("Game Over", True, (255, 80, 80))
+        self.surface.blit(title, shadow_rect)
+
+        # Display run won/lost text
         game_over_font = pygame.font.Font(None, 48)
-        game_over = game_over_font.render(f"Run Lost on Wave {wave}", True, (255, 255, 255)) if wave < 20 else game_over_font.render(f"Run Won", True, (255, 255, 255))
-        game_over_rect = game_over.get_rect(center = (self._width // 2, 50))
+        game_over = game_over_font.render(f"Run Lost on Wave {wave}", True, (255, 255, 255)) if wave < 20 else game_over_font.render("Run Won!", True, (255, 255, 255))
+        game_over_rect = game_over.get_rect(center=(self._width // 2, 150))
         self.surface.blit(game_over, game_over_rect)
+
+        # Display stats
         self.display_game_over_stats(player)
-        
-        # display options
+
+        # Display restart/exit buttons
         options = ["Restart", "Exit"]
         options_font = pygame.font.Font(None, 42)
-        option_spacing = 120
-
-        options_y = 150 + (self._height - 200)
-
-        option_surfaces = [options_font.render(f"{txt}", True, (255,255,0) if i+1==selected_option else (255,255,255)) for i, txt in enumerate(options)]
-        total_width = sum(surf.get_width() for surf in option_surfaces) + option_spacing * (len(options) - 1)
+        option_spacing = 60
+        button_w, button_h = 200, 60
+        total_width = len(options) * button_w + (len(options) - 1) * option_spacing
         start_x = (self._width - total_width) // 2
+        options_y = self._height - 130
 
-        current_x = start_x
-        for surf in option_surfaces:
-            rect = surf.get_rect(midtop=(current_x + surf.get_width()//2, options_y))
-            self.surface.blit(surf, rect)
-            current_x += surf.get_width() + option_spacing
-        
+        for i, txt in enumerate(options):
+            x = start_x + i * (button_w + option_spacing)
+            rect = pygame.Rect(x, options_y, button_w, button_h)
+            color = (255, 220, 80) if selected_option == i+1 else (60, 60, 60)
+            pygame.draw.rect(self.surface, color, rect, border_radius=18)
+            pygame.draw.rect(self.surface, (255, 255, 255), rect, 3, border_radius=18)
+
+            text_surface = options_font.render(txt, True, (0, 0, 0) if selected_option == i+1 else (255, 255, 255))
+            text_rect = text_surface.get_rect(center=rect.center)
+            self.surface.blit(text_surface, text_rect)
+
     def display_game_over_stats(self, player):
-        # overall stats
-        rect_width = self._width - 200
-        rect_height = self._height - 200
-        rect_x = 100
-        rect_y = 100
-        rect = pygame.Rect(rect_x, rect_y, rect_width, rect_height)
-        self.surface.fill("black", rect)
-        
-        # stats rectangle
-        stats_rect_width = rect_width - 800
-        stats_rect = pygame.Rect(rect_x, rect_y, stats_rect_width, rect_height)
-        self.surface.fill("pink", stats_rect)
-        
-        # player stats
-        font = pygame.font.Font(None, 36)
-        stats_font = pygame.font.Font(None, 24)
-        text = font.render("Stats", True, (255, 255, 255))
-        text_rect = text.get_rect(center=(stats_rect.centerx, rect_y + 25))
-        self.surface.blit(text, text_rect)
-        
-        stats = {
-            "HP": player.max_hp,
-            "Melee Damage": player.melee_dmg,
-            "Ranged Damage": player.ranged_dmg,
-            "Magic Damage": player.magic_dmg,
-            "Range": player.range,
-            "Armor": player.max_armor,
-            "Speed": round(player.speed, 2)
-        }
-        
-        start_y = text_rect.bottom + 20
-        line_height = 32
-        for i, (stat_id, stat) in enumerate(stats.items()):
-            stat_text = f"{stat_id}: {stat}"
-            rendered = stats_font.render(stat_text, True, (0, 0, 0))
-            self.surface.blit(rendered, (stats_rect.left + 20, start_y + i * line_height))
+        '''Display player stats at Game Over.'''
+        rect_w, rect_h = 400, 340
+        rect_x = (self._width - rect_w) // 2
+        rect_y = 210
+        stats_rect = pygame.Rect(rect_x, rect_y, rect_w, rect_h)
+
+        panel_color = (118, 9, 9)
+        border_color = (0, 0, 0)
+        pygame.draw.rect(self.surface, panel_color, stats_rect, border_radius=24)
+        pygame.draw.rect(self.surface, border_color, stats_rect, 3, border_radius=24)
+
+        # Display title
+        font = pygame.font.Font(None, 38)
+        stats_title = font.render("Your Stats", True, (255, 255, 255))
+        stats_title_rect = stats_title.get_rect(center=(rect_x + rect_w//2, rect_y + 36))
+        self.surface.blit(stats_title, stats_title_rect)
+
+        # Display player stats
+        stats_font = pygame.font.Font(None, 28)
+        stats = [
+            ("HP", player.max_hp),
+            ("Melee Damage", player.melee_dmg),
+            ("Ranged Damage", player.ranged_dmg),
+            ("Magic Damage", player.magic_dmg),
+            ("Armor", player.max_armor),
+            ("Speed", round(player.speed, 2)),
+        ]
+        start_y = stats_title_rect.bottom + 25
+        stat_color = (230, 230, 230)
+        for i, (name, val) in enumerate(stats):
+            txt = f"{name}: {val}"
+            stat_text = stats_font.render(txt, True, stat_color)
+            self.surface.blit(stat_text, (rect_x + 40, start_y + i * 40))
         
     def display_level_up_screen(self, upgrade_options, upgrade_selected, upgrade_preview_stats, player):
+        '''Display level up selection screen.'''
         self.surface.fill((30, 30, 30))
         font = pygame.font.Font(None, 48)
         title = font.render("Choose an upgrade", True, (255, 255, 255))
@@ -221,6 +247,7 @@ class Screen:
         self.surface.blit(pending_levels, (800, 200))
         
     def display_shop_screen(self, shop_selection, items, player, current_round):
+        '''Display shop screen with items and weapon upgrades.'''
         # Display shop title and gold
         self.surface.fill((30, 30, 30))
         font = pygame.font.Font(None, 36)
@@ -252,8 +279,6 @@ class Screen:
                 self.surface.blit(bought_text, (rect_x + item_width // 2 - bought_text.get_width() // 2, y + item_height // 2 - bought_text.get_height() // 2))
                 continue
 
-            # --- TUTAJ POPRAWKA ---
-            # Jeśli to broń (klucz w WEAPONS)
             if item_key in WEAPONS:
                 weapon_key = item_key
                 weapon_data = WEAPONS[weapon_key]
@@ -268,22 +293,25 @@ class Screen:
                     price = weapon_data["base_price"]
                     price_text = item_font.render(f"Buy for {price} gold", True, (255, 215, 0))
                     self.surface.blit(price_text, (rect_x + 10, y + 150))
-                    effect = f"+{weapon_data['damage']} dmg, {weapon_data['attack_speed']} atk spd"
+                    effect = f"+{weapon_data['damage']:.2f} dmg, {weapon_data['attack_speed']} atk spd"
                     effect_text = item_font.render(effect, True, (50, 255, 100))
                     self.surface.blit(effect_text, (rect_x + 10, y + 175))
                 elif weapon.level < 4:
-                    upgrade_price = ceil(weapon_data["base_price"] * (1.3 ** weapon.level))
-                    price_text = item_font.render(f"Upgrade (lvl {weapon.level}) for {upgrade_price} gold", True, (50, 255, 100))
-                    self.surface.blit(price_text, (rect_x + 10, y + 150))
+                    upgrade_price = ceil(weapon_data["base_price"] * (1.6 ** weapon.level))
+                    price_lines = [f"Upgrade (lvl {weapon.level})", f"{upgrade_price} gold"]
+                    for idx, line in enumerate(price_lines):
+                        price_text = item_font.render(line, True, (255, 215, 0))
+                        self.surface.blit(price_text, (rect_x + 10, y + 150 + idx * price_text.get_height()))
+                    
                     upg_dmg = weapon_data.get("damage/upgrade", 0)
                     upg_spd = weapon_data.get("attack_speed/upgrade", 0)
-                    effect = f"+{upg_dmg} dmg, +{upg_spd} atk spd"
-                    effect_text = item_font.render(effect, True, (50, 255, 100))
-                    self.surface.blit(effect_text, (rect_x + 10, y + 175))
+                    effect_lines = [f"+{upg_dmg} dmg", f"+{upg_spd} atk spd"]
+                    for idx, line in enumerate(effect_lines):
+                        effect_text = item_font.render(line, True, (50, 255, 100))
+                        self.surface.blit(effect_text, (rect_x + 10, y + 195 + idx * effect_text.get_height()))
                 else:
                     max_text = item_font.render("Max level!", True, (200, 0, 0))
                     self.surface.blit(max_text, (rect_x + 10, y + 150))
-            # Jeśli to item (klucz w ITEMS)
             elif item_key in ITEMS:
                 item = ITEMS[item_key]
                 if item["image_path"]:

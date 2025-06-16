@@ -5,6 +5,7 @@ from math import hypot, atan2, degrees
 from assets import get_projectile_image
 
 class Projectile(entity.Entity):
+    '''Class representing a projectile (bullet, magic, etc.) in the game'''
     def __init__(self, x, y, width, height, speed, damage, range, image_path, direction=None, homing=False, target_pos=None, side="center"):
         super().__init__(x, y, width, height, image_path)
         self.speed = speed
@@ -21,6 +22,7 @@ class Projectile(entity.Entity):
         self.base_image = get_projectile_image(image_path, (width, height))
 
     def update(self, enemies):
+        '''Updates the projectile's position. Handles homing logic if enabled.'''
         if self.homing and not self.lost_target:
             if self.target is None or getattr(self.target, "current_hp", 1) <= 0:
                 if self.target is not None:
@@ -54,9 +56,11 @@ class Projectile(entity.Entity):
                 self.travelled += self.speed
             
     def should_remove(self, screen_width, screen_height):
+        '''Determines if the projectile should be removed.'''
         return (self.x < 0 or self.x > screen_width or self.y < 0 or self.y > screen_height)
         
     def find_closest_enemy(self, enemies):
+        '''Finds the nearest enemy for homing projectiles, filtered by side if needed.'''
         px = self.x + self.width // 2
         if self.side == "left":
             filtered = [e for e in enemies if e.x + e.width // 2 < px and getattr(e, "current_hp", 1) > 0]
@@ -71,23 +75,29 @@ class Projectile(entity.Entity):
         return min(filtered, key=lambda enemy: self.distance_to(enemy))
         
     def follow_enemy(self, enemy):
+        '''Moves the projectile towards a given enemy (used for homing).'''
         dx = (enemy.x + enemy.width//2) - (self.x + self.width//2)
         dy = (enemy.y + enemy.height//2) - (self.y + self.height//2)
         distance = hypot(dx, dy)
+        
         if distance == 0:
             return
+        
         dx /= distance
         dy /= distance
+        
         self.x += dx * self.speed
         self.y += dy * self.speed
         self.travelled += self.speed
         
     def distance_to(self, enemy):
+        '''Returns the distance to another entity (center-to-center).'''
         dx = (self.x + self.width//2) - (enemy.x + enemy.width//2)
         dy = (self.y + self.height//2) - (enemy.y + enemy.height//2)
         return hypot(dx, dy)
     
     def draw(self, screen):
+        '''Draws the projectile, rotated to match its direction.'''
         direction = self.last_direction if self.homing else self.direction
         if direction is not None and direction != (0, 0):
             angle_rad = atan2(-direction[1], direction[0])
