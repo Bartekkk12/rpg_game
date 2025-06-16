@@ -20,7 +20,7 @@ ENEMIES = {
                      "hp+/wave": 1, "dmg+/wave": 1, "speed+/wave": 0.15, "spawn_wave": 4},
     
     # first wave appearing 6
-    "mutan_broccoli": {"max_hp": 15, "speed": 3, "damage": 5, "attack_speed": 1, "range": 50, "exp": 10, "gold": 10, "sprite": "src/sprites/enemies/mutant_broccoli.png", "size": 80,
+    "mutant_broccoli": {"max_hp": 15, "speed": 3, "damage": 5, "attack_speed": 1, "range": 50, "exp": 10, "gold": 10, "sprite": "src/sprites/enemies/mutant_broccoli.png", "size": 80,
                        "hp+/wave": 5, "dmg+/wave": 1, "speed+/wave": 0.15, "spawn_wave": 6},
     
     # first wave appearing 8

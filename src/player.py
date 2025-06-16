@@ -101,7 +101,7 @@ class Player(entity.Entity):
         return self.exp >= self.exp_needed
     
     def level_up(self):
-        '''Levbels up the player, increases stats, and sets experience for next level.'''
+        '''Levels up the player, increases stats, and sets experience for next level.'''
         self.level += 1
         self.max_hp += 1
         self.pending_level_ups += 3

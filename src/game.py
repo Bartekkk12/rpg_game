@@ -86,7 +86,7 @@ class Game:
                     self.state = "shop"
                 return
                     
-        # loot colection
+        # loot collection
         for loot in self.dead_enemies_loot[:]:
             if loot.get_rect().colliderect(self.player.get_rect()):
                 self.player.gold += loot.amount
@@ -408,7 +408,6 @@ class Game:
                             price = weapon_data["base_price"]
                             if self.player.gold >= price:
                                 self.player.gold -= price
-                                # Tworzenie odpowiedniego typu broni:
                                 if weapon_key in ["pistol", "bow"]:
                                     weapon_obj = Ranged_Weapon(weapon_key)
                                 elif weapon_key in ["magic_wand", "pyromancy_flame"]:
