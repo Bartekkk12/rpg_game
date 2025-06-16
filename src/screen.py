@@ -4,6 +4,7 @@ from settings import *
 from item import ITEMS
 from math import ceil
 from weapon import WEAPONS
+from assets import get_sprite
 
 class Screen:
     def __init__(self):
@@ -220,21 +221,22 @@ class Screen:
         self.surface.blit(pending_levels, (800, 200))
         
     def display_shop_screen(self, shop_selection, items, player, current_round):
+        # Display shop title and gold
         self.surface.fill((30, 30, 30))
         font = pygame.font.Font(None, 36)
         title = font.render("Shop - Choose an item", True, (255, 255, 255))
         self.surface.blit(title, (self._width // 2 - title.get_width() // 2, 60))
+        self.display_player_gold(player)
         
+        # Calculate item slots
         item_width = int(self._width * 0.18)
         item_height = int(self._height * 0.45)
         spacing = int(self._width * 0.03)
-        
         total_items_width = 4 * item_width + 3 * spacing
         start_x = (self._width - total_items_width) // 2
         y = self._height // 2 - item_height // 2
         
-        self.display_player_gold(player)
-        
+        # Draw items on screen
         for i, item_key in enumerate(items):
             rect_x = start_x + i * (item_width + spacing)
             rect = pygame.Rect(rect_x, y, item_width, item_height)
@@ -244,20 +246,19 @@ class Screen:
 
             item_font = pygame.font.Font(None, 28)
 
+            # Item bought 
             if item_key is None:
-                bought_text = item_font.render("KUPIONO", True, (128, 128, 128))
-                self.surface.blit(
-                    bought_text,
-                    (rect_x + item_width // 2 - bought_text.get_width() // 2,
-                    y + item_height // 2 - bought_text.get_height() // 2)
-                )
+                bought_text = item_font.render("BOUGHT", True, (128, 128, 128))
+                self.surface.blit(bought_text, (rect_x + item_width // 2 - bought_text.get_width() // 2, y + item_height // 2 - bought_text.get_height() // 2))
                 continue
 
-            if i == 0:
+            # --- TUTAJ POPRAWKA ---
+            # Jeśli to broń (klucz w WEAPONS)
+            if item_key in WEAPONS:
                 weapon_key = item_key
                 weapon_data = WEAPONS[weapon_key]
                 weapon = player.weapons.get(weapon_key)
-                img = pygame.transform.scale(pygame.image.load(weapon_data["sprite"]), (100, 100))
+                img = get_sprite(weapon_data["sprite"], (100, 100))
                 img_x = rect_x + (item_width - 100) // 2
                 img_y = y + 10
                 self.surface.blit(img, (img_x, img_y))
@@ -282,15 +283,14 @@ class Screen:
                 else:
                     max_text = item_font.render("Max level!", True, (200, 0, 0))
                     self.surface.blit(max_text, (rect_x + 10, y + 150))
-            else:
-                # Item
+            # Jeśli to item (klucz w ITEMS)
+            elif item_key in ITEMS:
                 item = ITEMS[item_key]
                 if item["image_path"]:
                     img = pygame.transform.scale(pygame.image.load(item["image_path"]), (100, 100))
                     img_x = rect_x + (item_width - 100) // 2
                     img_y = y + 10
                     self.surface.blit(img, (img_x, img_y))
-                
                 name_text = item_font.render(item_key.replace('_', ' ').title(), True, (0, 0, 0))
                 self.surface.blit(name_text, (rect_x + 10, y + 120))
 

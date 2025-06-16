@@ -29,8 +29,10 @@ class Weapon:
         self.weapon_name = weapon_type
         self.weapon_type = WEAPONS[weapon_type]
         self.level = level
+        
         self.attack_speed = self.weapon_type["attack_speed"]
         self.range = self.weapon_type["range"]
+       
         self.image = get_sprite(self.weapon_type["sprite"], (70, 70))
         self.sound = get_sound(self.weapon_type.get("sound", ""), self.weapon_type["sound_volume"])
         self.sound.set_volume(self.weapon_type["sound_volume"])
@@ -43,11 +45,11 @@ class Weapon:
     def apply_upgrades(self):
         if self.level < 4:
             self.level += 1
-        for key, value in self.weapon_type.items():
-            if key.endswith("/upgrade"):
-                stat = key.replace("/upgrade", "")
-                if hasattr(self, stat):
-                    setattr(self, stat, getattr(self, stat) + value)
+            for key, value in self.weapon_type.items():
+                if key.endswith("/upgrade"):
+                    stat = key.replace("/upgrade", "")
+                    self.weapon_type[stat] += value
+                    setattr(self, stat, self.weapon_type[stat])
             
 class Melee_Weapon(Weapon):
     def __init__(self, weapon_type):
@@ -83,8 +85,12 @@ class Melee_Weapon(Weapon):
                 
             if dist <= self.range:
                 self.damage = self.weapon_type["damage"] + player.melee_dmg
-                nearest.current_hp -= self.damage
-                print(f"Melee Weapon hit enemy for {self.damage}")
+                if self.damage >= nearest.current_hp:
+                    nearest.current_hp
+                    print(f"Melee Weapon hit enemy for {self.damage:.2f}, Enemy died")
+                else:
+                    nearest.current_hp -= self.damage
+                    print(f"Melee Weapon hit enemy for {self.damage:.2f}, Enemy health: {nearest.current_hp:.2f}")
                 self.play_sound()
                 
             self.last_attack_time = current_time

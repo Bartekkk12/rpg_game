@@ -23,7 +23,7 @@ class Player(entity.Entity):
         self.exp_needed = 30
         self.gold = 0
 
-        # weapons: dict {weapon_key: WeaponObiekt}
+        # weapons
         self.weapons = {}
         self.MAX_WEAPONS = 4
         self.current_weapons = 0
@@ -85,9 +85,6 @@ class Player(entity.Entity):
         dy = self.y - enemy.y
         return math.hypot(dx, dy)
     
-    def check_level_up(self):
-        return self.exp >= self.exp_needed
-    
     def regen_hp(self):
         current_time = pygame.time.get_ticks()
         time_since_last_damage = (current_time - self.last_time_damaged) / 1000
@@ -99,9 +96,13 @@ class Player(entity.Entity):
                 self.current_hp = self.max_hp
             self.last_time_hp_regen = current_time
             print("Player hp regened for 1")
+            
+    def check_level_up(self):
+        return self.exp >= self.exp_needed
     
     def level_up(self):
         self.level += 1
+        self.max_hp += 1
         self.pending_level_ups += 3
         self.exp -= self.exp_needed
         self.exp_needed += 20
@@ -195,11 +196,11 @@ class Player(entity.Entity):
             screen.surface.blit(rotated_image, rotated_rect.topleft)
 
     def reset_stats(self):
-        self.max_hp = 3
+        self.max_hp = 5
         self.current_hp = self.max_hp
         self.hp_regen = 1
         self.melee_dmg = 1
-        self.ranged_dmg = 1
+        self.ranged_dmg = 5
         self.magic_dmg = 1
         self.range = 50
         self.max_armor = 4

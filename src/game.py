@@ -27,7 +27,7 @@ class Game:
         self.round_in_progress = False
         self.round_time = 30  # seconds
         self.round_timer = 0
-        self.enemy_spawn_interval = 0.8 # enemies spawn rate
+        self.enemy_spawn_interval = 0.8
         self.enemy_spawn_timer = 0
         self.upgrade_options = []
         self.upgrade_selected = 0
@@ -133,8 +133,12 @@ class Game:
             projectile.draw(self.screen)
             for enemy in self.enemies[:]:
                 if projectile.get_rect().colliderect(enemy.get_rect()):
-                    enemy.current_hp -= projectile.damage
-                    print(f"Projectile hit enemy for {projectile.damage}")
+                    if projectile.damage >= enemy.current_hp:
+                        enemy.current_hp = 0
+                        print(f"Projectile hit enemy for {projectile.damage}, Enemy died")
+                    else:
+                        enemy.current_hp -= projectile.damage
+                        print(f"Projectile hit enemy for {projectile.damage}, Enemy health: {enemy.current_hp:.2f}")
                     self.projectiles.remove(projectile)
                     break
             else:
@@ -241,45 +245,45 @@ class Game:
                                 self.shop_selection = self.last_item_selection
                         elif event.key in (pygame.K_RETURN, pygame.K_KP_ENTER, pygame.K_SPACE):
                             if self.shop_selection in range(0, 4):
-                                if self.shop_selection == 0:
-                                    weapon_key = self.shop.current_items[0]
-                                    if weapon_key is None:
-                                        print("Broń już kupiona!")
-                                        return
+                                item_key = self.shop.current_items[self.shop_selection]
+                                if item_key is None:
+                                    print("Przedmiot już kupiony!" if self.shop_selection != 0 else "Brak broni do kupienia na tej pozycji.")
+                                    continue
+
+                                if item_key in WEAPONS:
+                                    # BROŃ (kup lub ulepsz)
+                                    weapon_key = item_key
                                     weapon_data = WEAPONS[weapon_key]
                                     weapon = self.player.weapons.get(weapon_key)
                                     if weapon is None:
                                         price = weapon_data["base_price"]
-                                        if weapon_key in ["pistol", "bow"]:
-                                            weapon_obj = Ranged_Weapon(weapon_key)
-                                        elif weapon_key in ["magic_wand", "pyromancy_flame"]:
-                                            weapon_obj = Magic_Weapon(weapon_key)
-                                        elif weapon_key in ["sword", "scythe"]:
-                                            weapon_obj = Melee_Weapon(weapon_key)
-                                        else:
-                                            weapon_obj = Weapon(weapon_key)
                                         if self.player.gold >= price:
                                             self.player.gold -= price
+                                            # Tworzenie odpowiedniego typu broni:
+                                            if weapon_key in ["pistol", "bow"]:
+                                                weapon_obj = Ranged_Weapon(weapon_key)
+                                            elif weapon_key in ["magic_wand", "pyromancy_flame"]:
+                                                weapon_obj = Magic_Weapon(weapon_key)
+                                            elif weapon_key in ["sword", "scythe"]:
+                                                weapon_obj = Melee_Weapon(weapon_key)
                                             self.player.weapons[weapon_key] = weapon_obj
-                                            self.shop.current_items[0] = None
-                                            print(f"Kupiono broń {weapon_key}")
+                                            self.shop.current_items[self.shop_selection] = None
+                                            print(f"Kupiono nową broń: {weapon_key}")
                                         else:
-                                            print("Za mało złota")
+                                            print("Za mało złota, by kupić broń.")
                                     elif weapon.level < 4:
                                         upgrade_price = math.ceil(weapon_data["base_price"] * (1.3 ** weapon.level))
                                         if self.player.gold >= upgrade_price:
                                             self.player.gold -= upgrade_price
                                             weapon.apply_upgrades()
+                                            self.shop.current_items[self.shop_selection] = None
                                             print(f"Ulepszono {weapon_key} do poziomu {weapon.level}")
                                         else:
-                                            print("Za mało złota")
+                                            print("Za mało złota, by ulepszyć broń.")
                                     else:
-                                        print("Broń na maksymalnym poziomie!")
-                                else:
-                                    item_key = self.shop.current_items[self.shop_selection]
-                                    if item_key is None:
-                                        print("Przedmiot już kupiony!")
-                                        return
+                                        print("Broń ma już maksymalny poziom!")
+                                elif item_key in ITEMS:
+                                    # ITEM (dowolny slot)
                                     item_info = ITEMS[item_key]
                                     price = math.ceil(item_info["base_price"] * (self.round * 1.15))
                                     if self.player.gold >= price:
@@ -290,7 +294,10 @@ class Game:
                                         print(f"Kupiono przedmiot {item_key}")
                                     else:
                                         print("Za mało złota")
+                                else:
+                                    print("Nieznany przedmiot/klucz w sklepie!")
                             elif self.shop_selection == 4:
+                                self.shop.roll_items(self.player)
                                 self.start_round()
                                 self.state = "game"
                         
@@ -326,7 +333,9 @@ class Game:
         pygame.quit()
 
     def start_round(self):
-        self.player.weapons["pistol"] = Ranged_Weapon("pistol")  # start with pistol
+        self.set_enemy_spawn_interval()
+        if "pistol" not in self.player.weapons:
+            self.player.weapons["pistol"] = Ranged_Weapon("pistol")
         self.dead_enemies_loot.clear()
         self.projectiles.clear()
         self.player.current_hp = self.player.max_hp
@@ -406,3 +415,13 @@ class Game:
             self.upgrade_preview_stats["Armor"] += direction
         elif upgrade_id == "Speed":
             self.upgrade_preview_stats["Speed"] += 0.4 * direction
+            
+    def set_enemy_spawn_interval(self):
+        if self.round < 5:
+            self.enemy_spawn_interval = 0.8 
+        elif 5 <= self.round < 10:
+            self.enemy_spawn_interval = 0.6
+        elif 10 <= self.round < 15:
+            self.enemy_spawn_interval = 0.4
+        else:
+            self.enemy_spawn_interval = 0.3
