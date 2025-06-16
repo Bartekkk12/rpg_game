@@ -1,5 +1,6 @@
 # The Last Onion
 
+Object-Oriented Programming 2 university course final project.
 A simple rouge-lite game inspired by Brotato, written in Python using Pygame.
 
 ## Description
