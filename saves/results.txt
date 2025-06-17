@@ -28,3 +28,48 @@ Magic Damage: 4
 Armor: 5
 Speed: 3.2
 
+---
+[2025-06-17 14:00:25]
+Result: Game Over
+Round: 14
+Gold: 236
+Level: 13
+EXP: 182
+Stats:
+HP: 47
+Melee Damage: 1
+Ranged Damage: 20
+Magic Damage: 7
+Armor: 9
+Speed: 3.2
+
+---
+[2025-06-17 14:48:53]
+Result: Game Over
+Round: 2
+Gold: 44
+Level: 2
+EXP: 14
+Stats:
+HP: 11
+Melee Damage: 1
+Ranged Damage: 1
+Magic Damage: 1
+Armor: 5
+Speed: 3.3
+
+---
+[2025-06-17 15:30:22]
+Result: Game Over
+Round: 3
+Gold: 73
+Level: 3
+EXP: 38
+Stats:
+HP: 12
+Melee Damage: 1
+Ranged Damage: 1
+Magic Damage: 1
+Armor: 5
+Speed: 3.3
+

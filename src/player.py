@@ -140,8 +140,8 @@ class Player(entity.Entity):
             return 0
         
         nearest = min(target_list, key=lambda e: (e.x + e.width//2 - weapon_x)**2 + (e.y + e.height//2 - weapon_y)**2)
-        dx = (nearest.x + nearest.width//2) - weapon_x
-        dy = (nearest.y + nearest.height//2) - weapon_y
+        dx = (nearest.x + nearest.width//2) - weapon_x # calcualte vector to enemy
+        dy = (nearest.y + nearest.height//2) - weapon_y # calcualte vector to enemy
         angle = math.degrees(math.atan2(-dy, dx))
         return angle
     

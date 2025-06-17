@@ -151,14 +151,15 @@ class Game:
                 if projectile.should_remove(self.screen._width, self.screen._height):
                     self.projectiles.remove(projectile) 
 
+        # handle player
         self.player.move(keys)
         self.player.draw(self.screen)
         self.player.draw_weapons(self.screen, self.enemies)
         self.player.regen_hp()  
-
         if self.player.current_hp <= 0:
             self.state = "game_over"
             
+        # UI
         time_left = max(0, int(self.round_time - self.round_timer)) if self.round_in_progress else None
         self.screen.display_UI(self.player, self.enemies, self.round, time_left)
 
