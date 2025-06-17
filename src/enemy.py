@@ -4,11 +4,11 @@ import entity
 
 ENEMIES = {
     # first wave appearing 1
-    "zombie_cabbage": {"max_hp": 3, "speed": 3, "damage": 1, "attack_speed": 1, "range": 50, "exp": 1, "gold": 2, "sprite": "src/sprites/enemies/zombie_cabbage.png", "size": 80,
+    "zombie_cabbage": {"max_hp": 3, "speed": 3, "damage": 1, "attack_speed": 1, "range": 50, "exp": 2, "gold": 2, "sprite": "src/sprites/enemies/zombie_cabbage.png", "size": 80,
                        "hp+/wave": 2, "dmg+/wave": 1, "speed+/wave": 0.15, "spawn_wave": 1},
     
     # first wave appearing 1
-    "rotten_carrot": {"max_hp": 2, "speed": 5, "damage": 1, "attack_speed": 1, "range": 50, "exp": 1, "gold": 2, "sprite": "src/sprites/enemies/rotten_carrot.png", "size": 80,
+    "rotten_carrot": {"max_hp": 2, "speed": 5, "damage": 1, "attack_speed": 1, "range": 50, "exp": 2, "gold": 2, "sprite": "src/sprites/enemies/rotten_carrot.png", "size": 80,
                       "hp+/wave": 1, "dmg+/wave": 1, "speed+/wave": 0.15, "spawn_wave": 1},
                           
     # first wave appearing 2
