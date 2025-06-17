@@ -1,6 +1,8 @@
 import pygame
 import random
 import math
+import datetime
+import os
 
 from screen import *
 from player import *
@@ -33,6 +35,7 @@ class Game:
         self.upgrade_options = []
         self.upgrade_selected = 0
         self.upgrade_preview_stats = {}
+        self.results_saved = False
 
         # music
         self.current_ost = None
@@ -201,9 +204,15 @@ class Game:
                 self.screen.display_shop_screen(self.shop_selection, self.shop.current_items, self.player, self.round)
             elif self.state == "game_over":
                 pygame.mixer.music.stop()
+                if not self.results_saved:
+                    self.save_game_results("Game Over")
+                    self.results_saved = True
                 self.screen.display_game_over_screen(self.round, self.selected_option, self.player)
             elif self.state == "victory":
                 pygame.mixer.music.stop()
+                if not self.results_saved:
+                    self.save_game_results("Victory")
+                    self.results_saved = True
                 self.screen.display_game_over_screen(self.round, self.selected_option, self.player)
                 
             self.screen.update()
@@ -317,6 +326,7 @@ class Game:
                 self.round = 1
                 self.start_round()
                 self.state = "game"
+                self.results_saved = False
             elif self.selected_option == 2:
                 self.running = False
                 
@@ -446,3 +456,33 @@ class Game:
                 self.shop.roll_items(self.player)
                 self.start_round()
                 self.state = "game"
+                
+    def save_game_results(self, result):
+        '''Saves the result of the game to a file, including player stats.'''
+        now = datetime.datetime.now()
+        timestamp = now.strftime("%Y-%m-%d %H:%M:%S")
+
+        stats = [
+            ("HP", self.player.max_hp),
+            ("Melee Damage", self.player.melee_dmg),
+            ("Ranged Damage", self.player.ranged_dmg),
+            ("Magic Damage", self.player.magic_dmg),
+            ("Armor", self.player.max_armor),
+            ("Speed", round(self.player.speed, 2)),
+        ]
+        
+        stat_lines = "\n".join([f"{name}: {value}" for name, value in stats])
+        
+        result_text = (
+            f"---\n[{timestamp}]\n"
+            f"Result: {result}\n"
+            f"Round: {self.round}\n"
+            f"Gold: {self.player.gold}\n"
+            f"Level: {self.player.level}\n"
+            f"EXP: {self.player.exp}\n"
+            f"Stats:\n{stat_lines}\n"
+        )
+
+        os.makedirs("saves", exist_ok=True)
+        with open("saves/results.txt", "a", encoding="utf-8") as f:
+            f.write(result_text + "\n")

@@ -1,0 +1,30 @@
+---
+[2025-06-17 12:07:27]
+Result: Game Over
+Round: 2
+Gold: 19
+Level: 2
+EXP: 6
+Stats:
+HP: 11
+Melee Damage: 1
+Ranged Damage: 1
+Magic Damage: 5
+Armor: 5
+Speed: 3
+
+---
+[2025-06-17 12:08:48]
+Result: Game Over
+Round: 2
+Gold: 27
+Level: 2
+EXP: 14
+Stats:
+HP: 11
+Melee Damage: 1
+Ranged Damage: 1
+Magic Damage: 4
+Armor: 5
+Speed: 3.2
+
