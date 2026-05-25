@@ -65,7 +65,7 @@ python main.py
 ---
 
 ## Project Structure
-
+'''
 src/
 ├── assets/
 │   └── assets.py
@@ -90,7 +90,7 @@ src/
 │   ├── projectile.py
 │   └── weapon.py
 └── main.py
-
+'''
 ---
 
 ## Controls
