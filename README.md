@@ -1,11 +1,19 @@
 # The Last Onion
 
-Object-Oriented Programming 2 university course final project.
-A simple rouge-lite game inspired by Brotato, written in Python using Pygame.
+![Python](https://img.shields.io/badge/Python-3.8+-blue)
+![Pygame](https://img.shields.io/badge/Pygame-2.x-green)
+![License](https://img.shields.io/badge/License-Educational-lightgrey)
+
+A fast-paced roguelite survival game where you fight endless waves of enemies as a lone onion warrior.
+
+Object-Oriented Programming 2 university course final project.  
+A roguelite game inspired by *Brotato*, written in Python using Pygame.
+
+---
 
 ## Description
 
-Survive as long as you can in an arena filled with waves of enemies. Collect gold and experience, level up, upgrade your stats, and buy new weapons and items between rounds. 
+Survive as long as you can in an arena filled with waves of enemies. Collect gold and experience, level up, upgrade your stats, and buy new weapons and items between rounds.
 
 The game features:
 
@@ -15,6 +23,8 @@ The game features:
 - **In-game shop between rounds**
 - **Various enemy types**
 - **Sound effects and music**
+
+---
 
 ## Screenshots
 
@@ -29,6 +39,8 @@ All screenshots are located in the `docs/` folder.
 ### Game Over
 ![Game Over](docs/gameover.png)
 
+---
+
 ## Requirements
 
 - Python 3.8 or higher
@@ -38,20 +50,22 @@ All screenshots are located in the `docs/` folder.
 
 ## Installation
 
-git clone https://github.com/Bartekkk12/rpg_game
-cd rpg_game
-pip install -r requirements.txt
+git clone https://github.com/Bartekkk12/rpg_game  
+cd rpg_game  
+pip install -r requirements.txt  
+
+---
 
 ## How to Run
 
-From the project root directory, run:
-```bash
+From the project root directory:
+
 python main.py
-```
+
+---
 
 ## Project Structure
 
-```
 src/
 ├── assets/
 │   └── assets.py
@@ -76,15 +90,18 @@ src/
 │   ├── projectile.py
 │   └── weapon.py
 └── main.py
-```
+
+---
 
 ## Controls
 
-- **W/S/A/D** or **Arrow keys** – Move
-- **Space** – attack
-- **Enter** – confirm/select in menus
-- **A/D or Arrow keys** – Navigate in menu/upgrades/shop
-- **ESC** – Quit
+- W/S/A/D or Arrow keys – Move
+- Space – Attack
+- Enter – Confirm / select in menus
+- A/D or Arrow keys – Navigate in menus and shop
+- ESC – Quit
+
+---
 
 ## Tech Stack
 
@@ -92,13 +109,19 @@ src/
 - Pygame
 - Object-Oriented Programming (OOP)
 
+---
+
 ## Authors
 
 - Bartekkk12
 
+---
+
 ## Assets
 
-- Graphics and sounds are either self-made or free to use (CC0).
+Graphics and sounds are either self-made or free to use (CC0).
+
+---
 
 ## License
 
