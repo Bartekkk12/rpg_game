@@ -1,7 +1,7 @@
 import random
 
-from item import ITEMS
-from weapon import WEAPONS
+from .item import ITEMS
+from weapon.weapon import WEAPONS
 
 class Shop:
     def __init__(self):

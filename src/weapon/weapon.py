@@ -1,8 +1,8 @@
 import pygame
 
-from projectile import *
-from player import *
-from assets import *
+from .projectile import *
+from entity.player.player import *
+from assets.assets import *
 
 WEAPONS = {
     "pistol": {"level": 1, "base_price": 20, "damage": 1, "attack_speed": 1.5, "range": 300, "projectile_speed": 20, "sprite": "src/sprites/weapons/pistol.png", "sound": "src/sprites/sounds/pistol_shot_sound.wav", "sound_volume": 0.1, "projectile": "src/sprites/weapons/bullet.png",

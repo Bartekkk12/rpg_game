@@ -1,6 +1,6 @@
 import pygame
 
-from assets import *
+from assets.assets import *
 from math import hypot
 
 class Entity:

@@ -1,7 +1,8 @@
 import pygame
-import entity
 
-class Gold(entity.Entity):
+from entity.entity import Entity
+
+class Gold(Entity):
     '''Class representing gold and experience pickups on the map'''
     def __init__(self, x, y, amount, exp):
         super().__init__(x, y, width=50, height=50, image_path="src/sprites/gold_exp.png")

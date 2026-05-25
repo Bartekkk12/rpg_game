@@ -73,3 +73,18 @@ Magic Damage: 1
 Armor: 5
 Speed: 3.3
 
+---
+[2026-05-25 19:06:38]
+Result: Game Over
+Round: 2
+Gold: 20
+Level: 1
+EXP: 20
+Stats:
+HP: 10
+Melee Damage: 1
+Ranged Damage: 1
+Magic Damage: 1
+Armor: 5
+Speed: 3
+

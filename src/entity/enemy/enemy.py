@@ -1,6 +1,7 @@
 import pygame
 import math
-import entity
+
+from entity.entity import Entity
 
 ENEMIES = {
     # first wave appearing 1
@@ -32,7 +33,7 @@ ENEMIES = {
                         "hp+/wave": 15, "dmg+/wave": 5, "speed+/wave": 0.15, "spawn_wave": 20},
 }
 
-class Enemy(entity.Entity):
+class Enemy(Entity):
     '''Enemy class representing a single enemy in the game'''
     def __init__(self, enemy_type, x, y, current_round):
         super().__init__(x, y, ENEMIES[enemy_type]["size"], ENEMIES[enemy_type]["size"], ENEMIES[enemy_type]["sprite"])

@@ -1,10 +1,11 @@
 import pygame
 import math
-import entity
 
-from settings import WIDTH, HEIGHT
+from game.settings import WIDTH, HEIGHT
+from entity.entity import Entity
 
-class Player(entity.Entity):
+
+class Player(Entity):
     '''Class representing the player character.'''
     def __init__(self):
         super().__init__(x=WIDTH // 2, y=HEIGHT // 2, width=100, height=100, image_path="src/sprites/player.png")

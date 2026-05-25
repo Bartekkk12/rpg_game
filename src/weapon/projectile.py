@@ -1,8 +1,8 @@
-import entity
 import pygame
 
 from math import hypot, atan2, degrees
-from assets import get_projectile_image
+from assets.assets import get_projectile_image
+from entity import entity
 
 class Projectile(entity.Entity):
     '''Class representing a projectile (bullet, magic, etc.) in the game'''

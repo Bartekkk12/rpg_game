@@ -4,14 +4,14 @@ import math
 import datetime
 import os
 
-from screen import *
-from player import *
-from enemy import *
-from gold import *
+from .screen import *
+from entity.player.player import *
+from entity.enemy.enemy import *
+from .gold import *
 from profile import *
-from weapon import *
-from shop import *
-from item import *
+from weapon.weapon import *
+from .shop import *
+from .item import *
 
 class Game:
     '''Class representing game logic and state manager.'''

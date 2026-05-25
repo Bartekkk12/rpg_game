@@ -16,15 +16,31 @@ The game features:
 - **Various enemy types**
 - **Sound effects and music**
 
+## Screenshots
+
+All screenshots are located in the `docs/` folder.
+
+### Gameplay
+![Gameplay](docs/gameplay.png)
+
+### Shop
+![Shop](docs/shop.png)
+
+### Game Over
+![Game Over](docs/gameover.png)
+
 ## Requirements
 
-- Python 3.8+
-- `pygame` library
+- Python 3.8 or higher
+- Pygame >= 2.0
 
-Install dependencies with:
-```bash
-pip install pygame
-```
+---
+
+## Installation
+
+git clone https://github.com/Bartekkk12/rpg_game
+cd rpg_game
+pip install -r requirements.txt
 
 ## How to Run
 
@@ -36,34 +52,45 @@ python main.py
 ## Project Structure
 
 ```
-.
-├── main.py                # Game entry point
-├── game.py                # Core game logic and loop
-├── player.py              # Player class
-├── enemy.py               # Enemy classes
-├── weapon.py              # Weapon classes
-├── projectile.py          # Projectiles
-├── item.py                # Items and passives
-├── shop.py                # Shop logic
-├── screen.py              # UI, drawing, menus
-├── gold.py                # Gold and experience logic
-├── profile.py             # Player profile management (optional)
-├── settings.py            # Constants and settings
-└── src/
-    └── sprites/
-        ├── backgrounds/
-        ├── weapons/
-        ├── player.png
-        ├── gold_exp.png
-        └── ...
+src/
+├── assets/
+│   └── assets.py
+├── entity/
+│   ├── entity.py
+│   ├── enemy/
+│   │   └── enemy.py
+│   └── player/
+│       └── player.py
+├── game/
+│   ├── game.py
+│   ├── gold.py
+│   ├── item.py
+│   ├── screen.py
+│   ├── settings.py
+│   └── shop.py
+├── sprites/
+│   ├── backgrounds/
+│   ├── weapons/
+│   └── ...
+├── weapon/
+│   ├── projectile.py
+│   └── weapon.py
+└── main.py
 ```
 
 ## Controls
 
 - **W/S/A/D** or **Arrow keys** – Move
-- **Space / Enter** – Confirm, attack, select in menu/shop
+- **Space** – attack
+- **Enter** – confirm/select in menus
 - **A/D or Arrow keys** – Navigate in menu/upgrades/shop
 - **ESC** – Quit
+
+## Tech Stack
+
+- Python
+- Pygame
+- Object-Oriented Programming (OOP)
 
 ## Authors
 
@@ -75,4 +102,4 @@ python main.py
 
 ## License
 
-Open-source project for educational and non-commercial use.
+This project is for educational purposes only and is not intended for commercial use.

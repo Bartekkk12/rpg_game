@@ -1,10 +1,10 @@
 import pygame
 
-from settings import *
-from item import ITEMS
+from .settings import *
+from .item import ITEMS
 from math import ceil
-from weapon import WEAPONS
-from assets import get_sprite
+from weapon.weapon import WEAPONS
+from assets.assets import get_sprite
 
 class Screen:
     '''Screen class creating a window.'''
